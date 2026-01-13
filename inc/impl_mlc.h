@@ -10,71 +10,73 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../printf/ft_printf.h"
-
 #ifndef IMPL_MLC_H
 # define IMPL_MLC_H
-
-# include "libft_malloc.h"
 
 # include <sys/mman.h>
 # include <unistd.h>
 # include <stdint.h>
+# include <pthread.h>
 
-# define _MLC_ALIGN		16
-# define _MASK_MLC_ALIGN	(_MLC_ALIGN - 1)
+# include "ft_printf.h"
+# include "libft_malloc.h"
 
-# define _MIN_ALC_PER_ZONE	100
+# ifndef NULL
+#  define NULL	((void *)0)
+# endif
 
-# define _TINY_MAX_ALC_SIZE	64
-# define _SMALL_MAX_ALC_SIZE	512
+# define _M_BIT_ALIGN	4UL
+# define _M_ALIGN	(1UL << _M_BIT_ALIGN)
+# define _M_ALIGN_MASK	(_M_ALIGN - 1UL)
 
-# define _TINY_ZONE_SIZE	(sizeof(t_zone) + (_MIN_ALC_PER_ZONE * (_TINY_MAX_ALC_SIZE + sizeof(t_header))))
-# define _SMALL_ZONE_SIZE	(sizeof(t_zone) + (_MIN_ALC_PER_ZONE * (_SMALL_MAX_ALC_SIZE + sizeof(t_header))))
+# define _M_TINY_MAX_ALC_SIZE	31UL
+# define _M_SMALL_MIN_ALC_SIZE	(_M_TINY_MAX_ALC_SIZE + 1UL)
+# define _M_SMALL_MAX_ALC_SIZE	127UL
+# define _M_LARGE_MIN_ALC_SIZE	(_M_SMALL_MAX_ALC_SIZE + 1UL)
 
-enum e_zone
+# define _M_TINY_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_TINY_MAX_SIZE))
+# define _M_SMALL_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_SMALL_MAX_SIZE))
+
+# define _M_FREE_MASK	04UL
+# define _M_AREN_MASK	03UL
+
+enum
 {
-	_MLC_ZONE_TINY,
-	_MLC_ZONE_SMALL,
-	_MLC_ZONE_LARGE
+	ARENA_TINY = 0UL,
+#	define ARENA_TINY	ARENA_TINY
+	ARENA_SMALL = 1UL,
+#	define ARENA_SMALL	ARENA_SMALL
+	ARENA_LARGE = 2UL,
+#	define ARENA_LARGE	ARENA_LARGE
 };
 
-typedef struct s_mlc_header t_header;
-struct s_mlc_header
-{
+typedef struct s_arena	t_arena;
+typedef struct s_heap	t_heap;
+typedef struct s_chunck	t_chunck;
+
+struct s_heap	{
+	t_heap	*next;
+	t_heap	*prev;
 	size_t	size;
-	size_t	isFree;
+	# if ( ((sizeof(s_heap *) + sizeof(size_t)) % _M_ALIGN) != 0)
+		uint8_t	_padding[((sizeof(s_heap *) + sizeof(s_heap *) + sizeof(size_t)) % _M_ALIGN)];	
+	# endif
 };
 
-typedef struct s_mlc_zone	t_mlc_zone;
-typedef struct s_mlc_zone	t_zone;
-struct s_mlc_zone
-{
-	t_zone	*next;
-	void	*end;
+struct s_arena	{
+	pthread_mutex_t	mtx;	
+	t_heap		*heap;
 };
 
-typedef t_mlc_zone 	t_zone_tiny;
-typedef t_mlc_zone	t_zone_small;
-typedef struct s_zone_large	t_zone_large;
-struct s_zone_large
+struct s_chunck
 {
-	void	*next;
-	size_t	used;
+	t_chunk	*bck;
 	size_t	size;
+	# if ( ((sizeof(t_chunk *) + sizeof(size_t)) % _M_ALIGN) != 0)
+		uint8_t	_padding[((sizeof(t_chunk *) + sizeof(size_t)) % _M_ALIGN)];
+	# endif
 };
 
-typedef struct s_zones	t_zones;
-struct s_zones
-{
-	t_zone_tiny	tiny;
-	t_zone_small	small;
-	t_zone_large	large;
-};
-
-t_zone	*_new_zone(const size_t _size);
-t_zone	*_new_tiny_zone(void);
-t_zone	*_new_small_zone(void);
-t_zone	*_new_ezone(const enum e_zone _eZone);
+extern t_arena	arenas[3]; 
 
 #endif
