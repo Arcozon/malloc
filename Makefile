@@ -5,18 +5,15 @@ endif
 NAME =  libft_malloc_$(HOSTTYPE).so
 NAME_SIMLINK = libft_malloc.so
 
-S_IMPL	 =  init.c newpage.c
+S_IMPL	 =  new_heap.c
 D_IMPL	 =  impl/
 SRC_IMPL =  $(addprefix $(D_IMPL), $(S_IMPL))
 
 SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c
 D_SRC	=  src/
 
-D_INC := inc/ . $(D_LPRINTF)
-
 D_BUILD = .build/
 OBJ =  $(addprefix $(D_BUILD), $(SRC:.c=.o))
-
 
 S_LPRINTF = ftprintf
 D_LPRINTF = .printf/
@@ -24,7 +21,10 @@ L_PRINTF = $(D_LPRINTF)lib$(S_LPRINTF).a
 
 CC =  cc 
 FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g
+
+D_INC := inc/ . $(D_LPRINTF)
 IFLAGS = $(addprefix -I, $(D_INC))
+
 RM =  rm -rf
 LINKER = $(CC) $(FLAGS) -shared
 

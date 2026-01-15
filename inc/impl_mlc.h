@@ -21,22 +21,19 @@
 # include "ft_printf.h"
 # include "libft_malloc.h"
 
-# ifndef NULL
-#  define NULL	((void *)0)
-# endif
-
 # define _M_BIT_ALIGN	4UL
 # define _M_ALIGN	(1UL << _M_BIT_ALIGN)
 # define _M_ALIGN_MASK	(_M_ALIGN - 1UL)
 
-# define _M_TINY_MAX_ALC_SIZE	31UL
+# define _M_TINY_MAX_ALC_SIZE	32UL
 # define _M_SMALL_MIN_ALC_SIZE	(_M_TINY_MAX_ALC_SIZE + 1UL)
-# define _M_SMALL_MAX_ALC_SIZE	127UL
+# define _M_SMALL_MAX_ALC_SIZE	128UL
 # define _M_LARGE_MIN_ALC_SIZE	(_M_SMALL_MAX_ALC_SIZE + 1UL)
 
-# define _M_TINY_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_TINY_MAX_SIZE))
-# define _M_SMALL_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_SMALL_MAX_SIZE))
+# define _M_TINY_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_TINY_MAX_ALC_SIZE))
+# define _M_SMALL_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_SMALL_MAX_ALC_SIZE))
 
+# define _M_FIRST_MASK	010UL
 # define _M_FREE_MASK	04UL
 # define _M_AREN_MASK	03UL
 
@@ -52,31 +49,37 @@ enum
 
 typedef struct s_arena	t_arena;
 typedef struct s_heap	t_heap;
-typedef struct s_chunck	t_chunck;
 
-struct s_heap	{
-	t_heap	*next;
-	t_heap	*prev;
-	size_t	size;
-	# if ( ((sizeof(s_heap *) + sizeof(size_t)) % _M_ALIGN) != 0)
-		uint8_t	_padding[((sizeof(s_heap *) + sizeof(s_heap *) + sizeof(size_t)) % _M_ALIGN)];	
-	# endif
-};
+typedef struct s_chunk	t_chunk;
+typedef struct s_fchunk	t_fchunk;
+
+struct s_heap{
+	t_heap		*fwd;
+	//t_heap	*bck;
+	t_fchunk	*flst;
+}	__attribute__((aligned(_M_ALIGN)));
+
 
 struct s_arena	{
 	pthread_mutex_t	mtx;	
 	t_heap		*heap;
 };
 
-struct s_chunck
+struct s_chunk
 {
 	t_chunk	*bck;
+	t_chunk	*fwd;
+}	__attribute__((aligned(_M_ALIGN)));
+
+struct s_fchunk
+{
+	t_fchunk	*bck;
+	t_fchunk	*fwd;
 	size_t	size;
-	# if ( ((sizeof(t_chunk *) + sizeof(size_t)) % _M_ALIGN) != 0)
-		uint8_t	_padding[((sizeof(t_chunk *) + sizeof(size_t)) % _M_ALIGN)];
-	# endif
-};
+}	__attribute__((aligned(_M_ALIGN)));
 
 extern t_arena	arenas[3]; 
+
+t_heap	*new_tiny_heap(t_heap *restrict prev);
 
 #endif

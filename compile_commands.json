@@ -1,0 +1,65 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-builtin",
+      "-fPIC",
+      "-g",
+      "-Iinc/",
+      "-I.",
+      "-I.printf/",
+      "-c",
+      "-o",
+      ".build/impl/new_heap.o",
+      "src/impl/new_heap.c"
+    ],
+    "directory": "/home/gaeudes/Code/malloc",
+    "file": "/home/gaeudes/Code/malloc/src/impl/new_heap.c",
+    "output": "/home/gaeudes/Code/malloc/.build/impl/new_heap.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-builtin",
+      "-fPIC",
+      "-g",
+      "-Iinc/",
+      "-I.",
+      "-I.printf/",
+      "-c",
+      "-o",
+      ".build/free.o",
+      "src/free.c"
+    ],
+    "directory": "/home/gaeudes/Code/malloc",
+    "file": "/home/gaeudes/Code/malloc/src/free.c",
+    "output": "/home/gaeudes/Code/malloc/.build/free.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-fno-builtin",
+      "-fPIC",
+      "-g",
+      "-Iinc/",
+      "-I.",
+      "-I.printf/",
+      "-c",
+      "-o",
+      ".build/malloc.o",
+      "src/malloc.c"
+    ],
+    "directory": "/home/gaeudes/Code/malloc",
+    "file": "/home/gaeudes/Code/malloc/src/malloc.c",
+    "output": "/home/gaeudes/Code/malloc/.build/malloc.o"
+  }
+]
