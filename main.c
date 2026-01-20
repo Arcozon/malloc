@@ -20,5 +20,7 @@ int	main(void)
 	ft_fprintf(2, "pT0-1 Diff:[%u]\n", pT1 - pT);
 	ft_fprintf(2, "pT1-2 Diff:[%u]\n\n", pT2 - pT1);
 
+	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
+	free(pT);
 
 }

@@ -5,7 +5,7 @@ endif
 NAME =  libft_malloc_$(HOSTTYPE).so
 NAME_SIMLINK = libft_malloc.so
 
-S_IMPL	 =  new_heap.c
+S_IMPL	 =  new_heap.c  debug.c
 D_IMPL	 =  impl/
 SRC_IMPL =  $(addprefix $(D_IMPL), $(S_IMPL))
 

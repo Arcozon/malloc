@@ -8,32 +8,16 @@ static inline void	*_m_align_adrr(void *_adrr)
 	return (_adrr);
 }*/
 
-void	debug_flst(const t_heap *heap)
-{
-	ft_fprintf(2, "\n");
-	if (!heap){
-		ft_fprintf(2, "No heap for freelst\n");
-		return ;
-	}
-	t_flst	*flst = heap->flst;
-	int	cout = 0;
-	while (flst)
-	{
-		ft_fprintf(2, "[%d]: %p | size: %u | nxt: %p\n", cout, flst, (unsigned int)flst->size, flst->fwd);
-		++cout;
-		flst = flst->fwd;
-	}
-	ft_fprintf(2, "\n");
-}
 
 
 t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_flst *_bres)
 {
-	while (_flst)
+	while (_flst != NULL)
 	{
-		if (_flst->size == _size)
+		const size_t flstSize = _flst->size & ~_M_DATA_MASK;
+		if (flstSize == _size)
 			return ((t_flst  *)_flst);
-		else if (_flst->size > _size && (!_bres || _bres->size > _flst->size))
+		else if (flstSize > _size && (_bres == NULL || flstSize < (_bres->size & ~_M_DATA_MASK)))
 			_bres = _flst;
 		_flst = _flst->fwd;
 	}
@@ -44,9 +28,9 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 {
 	t_flst	*bres = NULL;
 
-	while (_heap) {
+	while (_heap != NULL) {
 		bres = _find_in_flst(_size, _heap->flst, bres);
-		if (bres && bres->size == _size)
+		if (bres && (bres->size & ~_M_DATA_MASK) == _size)
 			break ;
 		_heap = _heap->fwd;
 	}
@@ -56,9 +40,9 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 
 void	_del_flst(t_flst *_todel)
 {
-	if (_todel->fwd)
+	if (_todel->fwd != NULL)
 		_todel->fwd->bck = _todel->bck;
-	if (_todel->bck)
+	if (_todel->bck != NULL)
 		_todel->bck = _todel->fwd;
 	else
 		_todel->pheap->flst = _todel->fwd;
@@ -72,50 +56,58 @@ void	_insert_new_flst(t_flst *_old, const size_t _size)
 	new->pheap = _old->pheap;
 	new->bck = _old;
 	new->fwd = _old->fwd;
-	new->size = _old->size - _size - sizeof(t_chunk);
+	new->size = (_old->size & ~_M_DATA_MASK) - _size - sizeof(t_chunk);
+	new->size |= _M_FREE_MASK;
 	_old->fwd = new;
 }
 
-void	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
+t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 {
 	ft_fprintf(2, "La %p\n", *_pheap);
-	t_flst	*res = _find_in_heaps(_size, *_pheap);
+	t_flst	*fptr = _find_in_heaps(_size, *_pheap);
 
 
-	if (!res) {
+	if (!fptr) {
 		t_heap	*nheap = new_heap(_pheap, _size);
 		 if (!nheap)
 			 return (NULL);
-		 res = _find_in_flst(_size, nheap->flst, NULL);
+		 fptr = _find_in_flst(_size, nheap->flst, NULL);
 	}
 	debug_flst(*_pheap);
-	if (res->size - _size >= sizeof(t_flst))
-		_insert_new_flst(res, _size);
-	res->size = _size;
+	if (fptr->size - _size >= sizeof(t_flst))
+		_insert_new_flst(fptr, _size);
+	fptr->size = _size;
+	_del_flst(fptr);
 	debug_flst(*_pheap);
-	_del_flst(res);
-	debug_flst(*_pheap);
-	return ((void *)res + sizeof(t_chunk));
+	return ((void *)fptr + sizeof(t_chunk));
 }
 
 void	*_mlc_tiny(const size_t _size)
 {
 	pthread_mutex_lock(&arenas[ARENA_TINY].mtx);
 
-	void	*res = _resrv_in_pheaps(_size, &(arenas[ARENA_TINY].heap));
-	
+	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_TINY].heap));
+	if (cres != NULL) {
+		cres->size &= ~_M_DATA_MASK;
+		cres->size |= ARENA_TINY;
+	}
+
 	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
-	return (res);
+	return ((void *)cres + sizeof(*cres));
 }
 
 void	*_mlc_small(const size_t _size)
 {
 	pthread_mutex_lock(&arenas[ARENA_SMALL].mtx);
 
-	void	*res = _resrv_in_pheaps(_size, &(arenas[ARENA_SMALL].heap));
-	
+	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_SMALL].heap));
+	if (cres != NULL) {
+		cres->size = ~_M_FREE_MASK;
+		cres->size |= ARENA_SMALL;
+	}
+
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
-	return (res);
+	return ((void *)cres + sizeof(*cres));
 }
 
 void	*_mlc_large(const size_t _size)

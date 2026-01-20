@@ -2,28 +2,31 @@
 #include "impl_mlc.h"
 
 t_arena arenas[3] = {
-	[ARENA_TINY] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = 0},
-	[ARENA_SMALL] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = 0},
-	[ARENA_LARGE] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = 0}
+	[ARENA_TINY] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = NULL},
+	[ARENA_SMALL] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = NULL},
+	[ARENA_LARGE] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = NULL}
 };
 
-t_heap	*_new_heap(const size_t _size)
+t_heap	*_new_heap(const size_t _size, const size_t _flagArena)
 {
-	t_heap	*nheap = mmap(NULL, _size, PROT_READ | PROT_WRITE, 
+	t_heap	*newHeap = mmap(NULL, _size, PROT_READ | PROT_WRITE, 
 			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	t_flst	*nflst = (void *)nheap + sizeof(*nheap);
+	t_flst	*nflst = (void *)newHeap + sizeof(*newHeap);
 
-	if (nheap == MAP_FAILED)
+	if (newHeap == MAP_FAILED)
 		return (NULL);
-	nheap->fwd = NULL;
-	nheap->flst = nflst;
+	newHeap->fwd = NULL;
+	newHeap->bck = NULL;
+	newHeap->size = (_size - sizeof(*newHeap)) | _flagArena;
+	newHeap->flst = nflst;
 	nflst->bck = NULL;
 	nflst->fwd = NULL;
-	nflst->pheap = nheap;
-	nflst->size = _size - sizeof(*nheap) - sizeof(t_chunk);
-	ft_fprintf(2, " -- New Heap: %p | size: %u\n", nheap, (unsigned int)_size);
-	ft_fprintf(2, " -- New Flst: %p | size: %u\n", nflst, (unsigned int)nflst->size);
-	return (nheap);
+	nflst->pheap = newHeap;
+	nflst->size = _size - sizeof(*newHeap) - sizeof(t_chunk);
+	nflst->size |= _M_FREE_MASK | _flagArena;
+	ft_fprintf(2, " -- New Heap: %p | size: %u\n", newHeap, (unsigned int)_size);
+	ft_fprintf(2, " -- New Flst: %p | size: %u\n", nflst, (unsigned int)(nflst->size & ~_M_DATA_MASK));
+	return (newHeap);
 }
 
 __attribute__((always_inline))
@@ -36,42 +39,51 @@ static inline size_t	_round_page_size(size_t size)
 
 	const size_t	rest_size = size % map_size;
 	
-	if (!rest_size && size)
+	if (rest_size == 0 && size)
 		return (size);
 	return (size + map_size - rest_size);
 }
 
-t_heap	*new_tiny_heap(t_heap **restrict _pheap)
+t_heap	*new_tiny_heap(void)
 {
-	size_t	tiny_size = _round_page_size(_M_TINY_SIZE);
+	const size_t	tiny_size = _round_page_size(_M_TINY_SIZE);
 	
 	if (!tiny_size)
 		return (NULL);
-	while (*_pheap)
-		_pheap = &(*_pheap)->fwd;
-	*_pheap = _new_heap(tiny_size);
-	return (*_pheap);
+	return (_new_heap(tiny_size, ARENA_TINY));
 }
 
-t_heap	*new_small_heap(t_heap **restrict _pheap)
+t_heap	*new_small_heap(void)
 {
-	size_t	small_size = _round_page_size(_M_SMALL_SIZE);
+	const size_t	small_size = _round_page_size(_M_SMALL_SIZE);
 	
 	if (!small_size)
 		return (NULL);
-	while (*_pheap)
-		_pheap = &(*_pheap)->fwd;
-	*_pheap = _new_heap(small_size);
-	return (*_pheap);
+	return (_new_heap(small_size, ARENA_SMALL));
 }
 
-t_heap	*new_heap(t_heap **restrict _pheap, const size_t _alloc_size)
+t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 {
-	if (_alloc_size <= _M_TINY_MAX_ALC_SIZE) {
-		return (new_tiny_heap(_pheap));
-	}
-	else if (_alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
-		return (new_small_heap(_pheap));
+
+	if (_alloc_size <= _M_TINY_MAX_ALC_SIZE || _alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
+		t_heap	*newHeap = NULL;
+	
+		if (_alloc_size <= _M_TINY_MAX_ALC_SIZE) {
+			newHeap = new_tiny_heap();
+		}
+		else if (_alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
+			newHeap = new_small_heap();
+		}
+		if (newHeap == NULL)
+			return (NULL);
+		t_heap	*prevHeap = NULL;
+		while (*_pHeapHead) {
+			prevHeap = *_pHeapHead;
+			_pHeapHead = &prevHeap->fwd;
+		}
+		*_pHeapHead = newHeap;
+		newHeap->bck = prevHeap;
+		return (newHeap);
 	}
 	else {
 		// BIG PAGE

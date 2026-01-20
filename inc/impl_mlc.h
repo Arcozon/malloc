@@ -37,10 +37,9 @@
 # define _M_TINY_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_TINY_MAX_ALC_SIZE))
 # define _M_SMALL_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_SMALL_MAX_ALC_SIZE))
 
-# define _M_FIRST_MASK	010UL
-# define _M_FREE_MASK	04UL
-# define _M_AREN_MASK	03UL
-
+# define _M_DATA_MASK	0b111UL
+# define _M_FREE_MASK	0b100UL
+# define _M_ARENA_MASK	0b011UL
 
 enum
 {
@@ -59,7 +58,9 @@ typedef struct s_flst	t_flst;
 
 struct s_heap {
 	t_heap	*fwd;
+	t_heap	*bck;
 	t_flst	*flst;
+	size_t	size;
 }	__attribute__((aligned(_M_ALIGN)));
 
 
@@ -83,7 +84,10 @@ struct s_flst {
 extern t_arena	arenas[3]; 
 
 t_heap	*new_heap(t_heap **restrict _pheap, const size_t _alloc_size);
-t_heap	*new_tiny_heap(t_heap **restrict _pheap);
-t_heap	*new_small_heap(t_heap **restrict _pheap);
+t_heap	*new_tiny_heap(void);
+t_heap	*new_small_heap(void);
+
+
+void	debug_flst(const t_heap *heap);
 
 #endif
