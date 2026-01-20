@@ -1,3 +1,4 @@
+#include "ft_printf.h"
 #include "impl_mlc.h"
 
 t_arena arenas[3] = {
@@ -6,25 +7,27 @@ t_arena arenas[3] = {
 	[ARENA_LARGE] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = 0}
 };
 
-t_heap	*_new_heap(const size_t size, t_heap *restrict prev)
+t_heap	*_new_heap(const size_t _size)
 {
-	t_heap	*ret = mmap(NULL, size, PROT_READ | PROT_WRITE, 
-			MAP_PRIVATE | MAP_ANONYMOUS
-			, -1, 0);
+	t_heap	*nheap = mmap(NULL, _size, PROT_READ | PROT_WRITE, 
+			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	t_flst	*nflst = (void *)nheap + sizeof(*nheap);
 
-	if (ret == MAP_FAILED)
+	if (nheap == MAP_FAILED)
 		return (NULL);
-	
-	ret->prev = prev;
-	if (prev)
-		prev->next = ret;
-	ret->next = 0;
-	ret->size = size;
-	return (ret);
+	nheap->fwd = NULL;
+	nheap->flst = nflst;
+	nflst->bck = NULL;
+	nflst->fwd = NULL;
+	nflst->pheap = nheap;
+	nflst->size = _size - sizeof(*nheap) - sizeof(t_chunk);
+	ft_fprintf(2, " -- New Heap: %p | size: %u\n", nheap, (unsigned int)_size);
+	ft_fprintf(2, " -- New Flst: %p | size: %u\n", nflst, (unsigned int)nflst->size);
+	return (nheap);
 }
 
 __attribute__((always_inline))
-static inline size_t	_round_size(size_t size)
+static inline size_t	_round_page_size(size_t size)
 {
 	const unsigned long map_size = sysconf(_SC_PAGESIZE);
 
@@ -33,16 +36,19 @@ static inline size_t	_round_size(size_t size)
 
 	const size_t	rest_size = size % map_size;
 	
-	if (!rest_size)
+	if (!rest_size && size)
 		return (size);
 	return (size + map_size - rest_size);
 }
 
-t_heap	*new_tiny_heap(t_heap *restrict prev)
+t_heap	*new_tiny_heap(t_heap **restrict _pheap)
 {
-	size_t	tiny_size = _round_size(_M_TINY_SIZE);
+	size_t	tiny_size = _round_page_size(_M_TINY_SIZE);
 	
 	if (!tiny_size)
-		return (0);
-	return (_new_heap(tiny_size, prev));
+		return (NULL);
+	while (*_pheap)
+		_pheap = &(*_pheap)->fwd;
+	*_pheap = _new_heap(tiny_size);
+	return (*_pheap);
 }

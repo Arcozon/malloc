@@ -25,9 +25,13 @@
 # define _M_ALIGN	(1UL << _M_BIT_ALIGN)
 # define _M_ALIGN_MASK	(_M_ALIGN - 1UL)
 
+# define _M_MIN_ALC_SIZE	(sizeof(t_flst) - sizeof(t_chunk))
+
 # define _M_TINY_MAX_ALC_SIZE	32UL
+
 # define _M_SMALL_MIN_ALC_SIZE	(_M_TINY_MAX_ALC_SIZE + 1UL)
 # define _M_SMALL_MAX_ALC_SIZE	128UL
+
 # define _M_LARGE_MIN_ALC_SIZE	(_M_SMALL_MAX_ALC_SIZE + 1UL)
 
 # define _M_TINY_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_TINY_MAX_ALC_SIZE))
@@ -36,6 +40,7 @@
 # define _M_FIRST_MASK	010UL
 # define _M_FREE_MASK	04UL
 # define _M_AREN_MASK	03UL
+
 
 enum
 {
@@ -49,37 +54,34 @@ enum
 
 typedef struct s_arena	t_arena;
 typedef struct s_heap	t_heap;
-
 typedef struct s_chunk	t_chunk;
-typedef struct s_fchunk	t_fchunk;
+typedef struct s_flst	t_flst;
 
-struct s_heap{
-	t_heap		*fwd;
-	//t_heap	*bck;
-	t_fchunk	*flst;
+struct s_heap {
+	t_heap	*fwd;
+	t_flst	*flst;
 }	__attribute__((aligned(_M_ALIGN)));
 
 
-struct s_arena	{
+struct s_arena {
 	pthread_mutex_t	mtx;	
 	t_heap		*heap;
 };
 
-struct s_chunk
-{
-	t_chunk	*bck;
-	t_chunk	*fwd;
-}	__attribute__((aligned(_M_ALIGN)));
-
-struct s_fchunk
-{
-	t_fchunk	*bck;
-	t_fchunk	*fwd;
+struct s_chunk {
+	t_heap	*pheap;
 	size_t	size;
-}	__attribute__((aligned(_M_ALIGN)));
+};
+
+struct s_flst {
+	t_heap	*pheap;
+	size_t	size;
+	t_flst	*fwd;
+	t_flst	*bck;
+};
 
 extern t_arena	arenas[3]; 
 
-t_heap	*new_tiny_heap(t_heap *restrict prev);
+t_heap	*new_tiny_heap(t_heap **restrict _pheap);
 
 #endif

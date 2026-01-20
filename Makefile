@@ -53,7 +53,7 @@ re: fclean
 	make all
 
 test:	$(NAME)
-	cc -I. -o$@ main.c -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE)
+	cc -I. -I$(D_LPRINTF) -o$@ main.c -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE) -L$(D_LPRINTF) -l$(S_LPRINTF)
 #	cc -L. -lft_malloc -o$@ main.c
 
 
