@@ -82,6 +82,8 @@ struct s_flst {
 
 extern t_arena	arenas[3]; 
 
+t_heap	*new_heap(t_heap **restrict _pheap, const size_t _alloc_size);
 t_heap	*new_tiny_heap(t_heap **restrict _pheap);
+t_heap	*new_small_heap(t_heap **restrict _pheap);
 
 #endif

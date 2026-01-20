@@ -52,3 +52,29 @@ t_heap	*new_tiny_heap(t_heap **restrict _pheap)
 	*_pheap = _new_heap(tiny_size);
 	return (*_pheap);
 }
+
+t_heap	*new_small_heap(t_heap **restrict _pheap)
+{
+	size_t	small_size = _round_page_size(_M_SMALL_SIZE);
+	
+	if (!small_size)
+		return (NULL);
+	while (*_pheap)
+		_pheap = &(*_pheap)->fwd;
+	*_pheap = _new_heap(small_size);
+	return (*_pheap);
+}
+
+t_heap	*new_heap(t_heap **restrict _pheap, const size_t _alloc_size)
+{
+	if (_alloc_size <= _M_TINY_MAX_ALC_SIZE) {
+		return (new_tiny_heap(_pheap));
+	}
+	else if (_alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
+		return (new_small_heap(_pheap));
+	}
+	else {
+		// BIG PAGE
+		return (NULL);
+	}
+}

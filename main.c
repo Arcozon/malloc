@@ -1,24 +1,24 @@
 #include "libft_malloc.h"
 #include "ft_printf.h"
-
+#include <string.h>
 
 int	main(void)
 {
-	char	*ptr = malloc(4);
-	write(1, "a\n", 2);
-	char	*ptr1 = malloc(4);
-	write(1, "b\n", 2);
-	char	*ptr2 = malloc(0);
-	write(1, "c\n", 2);
-	ptr[0] = '1';
-	ptr[1] = '2';
-	ptr[2] = '3';
-	ptr[3] = 0;
-	ft_fprintf(2, "Ptr:[%p], \"%s\"\n", ptr, ptr);
-	ft_fprintf(2, "Ptr:[%p], \"%s\"\n", ptr1, ptr1);
-	ft_fprintf(2, "Ptr:[%p], \"%s\"\n", ptr2, ptr2);
-	ft_fprintf(2, "PtrDiff:[%u]\n", ptr1 - ptr);
-	ft_fprintf(2, "PtrDiff:[%u]\n", ptr2 - ptr1);
+	char	*pT = malloc(4);
+	char	*pT1 = malloc(28);
+	char	*pT2 = malloc(0);
+	char	*pS = malloc(33);
+	char	*pS1 = malloc(64);
+
+	strcpy(pT, "CAC");
+	strcpy(pT1, "Salut a toi");
+	strcpy(pT2, "C");
 	
-	
+	ft_fprintf(2, "pT:[%p], \"%s\"\n", pT, pT);
+	ft_fprintf(2, "pT1:[%p], \"%s\"\n", pT1, pT1);
+	ft_fprintf(2, "pT2:[%p], \"%s\"\n", pT2, pT2);
+	ft_fprintf(2, "pT0-1 Diff:[%u]\n", pT1 - pT);
+	ft_fprintf(2, "pT1-2 Diff:[%u]\n\n", pT2 - pT1);
+
+
 }

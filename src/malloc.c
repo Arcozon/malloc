@@ -83,7 +83,7 @@ void	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 
 
 	if (!res) {
-		t_heap	*nheap = new_tiny_heap(&arenas[ARENA_TINY].heap);
+		t_heap	*nheap = new_heap(_pheap, _size);
 		 if (!nheap)
 			 return (NULL);
 		 res = _find_in_flst(_size, nheap->flst, NULL);
@@ -110,8 +110,12 @@ void	*_mlc_tiny(const size_t _size)
 
 void	*_mlc_small(const size_t _size)
 {
-	(void)_size;
-	return (NULL);
+	pthread_mutex_lock(&arenas[ARENA_SMALL].mtx);
+
+	void	*res = _resrv_in_pheaps(_size, &(arenas[ARENA_SMALL].heap));
+	
+	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
+	return (res);
 }
 
 void	*_mlc_large(const size_t _size)
