@@ -14,10 +14,10 @@ t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_
 {
 	while (_flst != NULL)
 	{
-		const size_t flstSize = _flst->size & ~_M_DATA_MASK;
+		const size_t flstSize = _flst->size & _M_SIZE_MASK;
 		if (flstSize == _size)
 			return ((t_flst  *)_flst);
-		else if (flstSize > _size && (_bres == NULL || flstSize < (_bres->size & ~_M_DATA_MASK)))
+		else if (flstSize > _size && (_bres == NULL || flstSize < (_bres->size & _M_SIZE_MASK)))
 			_bres = _flst;
 		_flst = _flst->fwd;
 	}
@@ -30,7 +30,7 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 
 	while (_heap != NULL) {
 		bres = _find_in_flst(_size, _heap->flst, bres);
-		if (bres && (bres->size & ~_M_DATA_MASK) == _size)
+		if (bres && (bres->size & _M_SIZE_MASK) == _size)
 			break ;
 		_heap = _heap->fwd;
 	}
@@ -56,7 +56,7 @@ void	_insert_new_flst(t_flst *_old, const size_t _size)
 	new->pheap = _old->pheap;
 	new->bck = _old;
 	new->fwd = _old->fwd;
-	new->size = (_old->size & ~_M_DATA_MASK) - _size - sizeof(t_chunk);
+	new->size = (_old->size & _M_SIZE_MASK) - _size - sizeof(t_chunk);
 	new->size |= _M_FREE_MASK;
 	_old->fwd = new;
 }
@@ -87,10 +87,8 @@ void	*_mlc_tiny(const size_t _size)
 	pthread_mutex_lock(&arenas[ARENA_TINY].mtx);
 
 	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_TINY].heap));
-	if (cres != NULL) {
-		cres->size &= ~_M_DATA_MASK;
-		cres->size |= ARENA_TINY;
-	}
+	if (cres != NULL)
+		cres->size = _size | ARENA_TINY;
 
 	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
 	return ((void *)cres + sizeof(*cres));
@@ -101,10 +99,8 @@ void	*_mlc_small(const size_t _size)
 	pthread_mutex_lock(&arenas[ARENA_SMALL].mtx);
 
 	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_SMALL].heap));
-	if (cres != NULL) {
-		cres->size = ~_M_FREE_MASK;
-		cres->size |= ARENA_SMALL;
-	}
+	if (cres != NULL)
+		cres->size = _size | ARENA_SMALL;
 
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
 	return ((void *)cres + sizeof(*cres));

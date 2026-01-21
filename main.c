@@ -6,21 +6,29 @@ int	main(void)
 {
 	char	*pT = malloc(4);
 	char	*pT1 = malloc(28);
-	char	*pT2 = malloc(0);
-	char	*pS = malloc(33);
-	char	*pS1 = malloc(64);
+	//char	*pT2 = malloc(0);
+	//char	*pS = malloc(33);
+	//char	*pS1 = malloc(64);
 
-	strcpy(pT, "CAC");
-	strcpy(pT1, "Salut a toi");
-	strcpy(pT2, "C");
+	//strcpy(pT, "CAC");
+	//strcpy(pT1, "Salut a toi");
+	//strcpy(pT2, "C");
 	
-	ft_fprintf(2, "pT:[%p], \"%s\"\n", pT, pT);
-	ft_fprintf(2, "pT1:[%p], \"%s\"\n", pT1, pT1);
-	ft_fprintf(2, "pT2:[%p], \"%s\"\n", pT2, pT2);
-	ft_fprintf(2, "pT0-1 Diff:[%u]\n", pT1 - pT);
-	ft_fprintf(2, "pT1-2 Diff:[%u]\n\n", pT2 - pT1);
+//	ft_fprintf(2, "pT:[%p], \"%s\"\n", pT, pT);
+//	ft_fprintf(2, "pT1:[%p], \"%s\"\n", pT1, pT1);
+//	ft_fprintf(2, "pT2:[%p], \"%s\"\n", pT2, pT2);
+//	ft_fprintf(2, "pT0-1 Diff:[%u]\n", pT1 - pT);
+//	ft_fprintf(2, "pT1-2 Diff:[%u]\n\n", pT2 - pT1);
 
-	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
+//	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
+//	free(pT);
+//	free(pT1);
+	for (int i = 0; i < 500; ++i)
+	{
+		pT = malloc(4);
+		ft_fprintf(1, "%p\n", pT);
+	}
+//	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
 	free(pT);
 
 }

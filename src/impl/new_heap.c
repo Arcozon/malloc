@@ -25,7 +25,8 @@ t_heap	*_new_heap(const size_t _size, const size_t _flagArena)
 	nflst->size = _size - sizeof(*newHeap) - sizeof(t_chunk);
 	nflst->size |= _M_FREE_MASK | _flagArena;
 	ft_fprintf(2, " -- New Heap: %p | size: %u\n", newHeap, (unsigned int)_size);
-	ft_fprintf(2, " -- New Flst: %p | size: %u\n", nflst, (unsigned int)(nflst->size & ~_M_DATA_MASK));
+	ft_fprintf(1, " -- New Heap: %p | size: %u\n", newHeap, (unsigned int)_size);
+	//ft_fprintf(2, " -- New Flst: %p | size: %u\n", nflst, (unsigned int)(nflst->size & ~_M_DATA_MASK));
 	return (newHeap);
 }
 

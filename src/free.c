@@ -2,24 +2,24 @@
 
 void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 {
-	t_flst	*bck = _heap->flst;
 	t_flst	*fwd = _heap->flst;
-
-	while (fwd != NULL) {
-		bck = fwd;
+	t_flst	*bck = NULL;
+	while (fwd != NULL && fwd < _pFree) {
 		fwd = fwd->fwd;
-		if (_pFree < fwd)
-			break;
 	}
+	
 	_pFree->fwd = fwd;
-	if (fwd != NULL)
+	if (fwd != NULL) {
 		fwd->bck = _pFree;
-	_pFree->bck = bck;
+		bck = fwd->bck;
+	}
+	_pfree->bck = bck;
 	if (bck != NULL) {
 		bck->fwd = _pFree;
 	} else {
 		_heap->flst = _pFree;
 	}
+	ft_fprintf(2, "Bck: %p\nMe: %p\nFwd: %p\n\n", bck, _pFree, fwd);
 }
 
 
@@ -32,13 +32,15 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	t_heap		*heap = _chunk->pheap;
 	t_flst		*pFree = (void *)_chunk;
 
+	ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
+	debug_flst(heap);
 	pFree->fwd = NULL;
 	pFree->bck = NULL;
-	pFree->size &= ~_M_DATA_MASK;
+	pFree->size &= _M_SIZE_MASK;
 	pFree->size |= _arenaMask | _M_FREE_MASK;
 
-	debug_flst(heap);
 	_insert_flst(pFree, heap); // Insert in flst
+	debug_flst(heap);
 
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
 }

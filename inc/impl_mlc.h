@@ -38,6 +38,7 @@
 # define _M_SMALL_SIZE	(sizeof(t_heap) + 100UL * (sizeof(t_chunk) + _M_SMALL_MAX_ALC_SIZE))
 
 # define _M_DATA_MASK	0b111UL
+# define _M_SIZE_MASK	(~_M_DATA_MASK)
 # define _M_FREE_MASK	0b100UL
 # define _M_ARENA_MASK	0b011UL
 
