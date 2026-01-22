@@ -1,7 +1,6 @@
 #include "impl_mlc.h"
 void	debug_flst(const t_heap *heap)
 {
-	ft_fprintf(2, "\n");
 	if (heap == NULL){
 		ft_fprintf(2, "No heap for freelst\n");
 		return ;
@@ -14,6 +13,5 @@ void	debug_flst(const t_heap *heap)
 		++cout;
 		flst = flst->fwd;
 	}
-	ft_fprintf(2, "\n");
 }
 

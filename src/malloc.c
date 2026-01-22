@@ -42,10 +42,12 @@ void	_del_flst(t_flst *_todel)
 {
 	if (_todel->fwd != NULL)
 		_todel->fwd->bck = _todel->bck;
-	if (_todel->bck != NULL)
+	if (_todel->bck != NULL) {
 		_todel->bck = _todel->fwd;
-	else
+	}
+	else {
 		_todel->pheap->flst = _todel->fwd;
+	}
 }
 
 
@@ -63,7 +65,6 @@ void	_insert_new_flst(t_flst *_old, const size_t _size)
 
 t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 {
-	ft_fprintf(2, "La %p\n", *_pheap);
 	t_flst	*fptr = _find_in_heaps(_size, *_pheap);
 
 
@@ -73,13 +74,16 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 			 return (NULL);
 		 fptr = _find_in_flst(_size, nheap->flst, NULL);
 	}
-	debug_flst(*_pheap);
+	//ft_fprintf(2, "Before Alc:\n");
+	//debug_flst(*_pheap);
 	if (fptr->size - _size >= sizeof(t_flst))
 		_insert_new_flst(fptr, _size);
 	fptr->size = _size;
 	_del_flst(fptr);
-	debug_flst(*_pheap);
-	return ((void *)fptr + sizeof(t_chunk));
+	//ft_fprintf(2, "After Alc:\n");
+	//debug_flst(*_pheap);
+	//ft_fprintf(2, "\n");
+	return ((t_chunk *)fptr);
 }
 
 void	*_mlc_tiny(const size_t _size)
@@ -90,6 +94,7 @@ void	*_mlc_tiny(const size_t _size)
 	if (cres != NULL)
 		cres->size = _size | ARENA_TINY;
 
+	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));
 	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
 	return ((void *)cres + sizeof(*cres));
 }
@@ -103,6 +108,7 @@ void	*_mlc_small(const size_t _size)
 		cres->size = _size | ARENA_SMALL;
 
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
+	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));
 	return ((void *)cres + sizeof(*cres));
 }
 
@@ -123,13 +129,12 @@ static inline size_t	_round_size(size_t _size)
 }
 void	*malloc(size_t _size)
 {
-	ft_fprintf(2, " -- TO ALLOC -- %u(%u)\n\n", (unsigned int)_round_size(_size), (unsigned int)_size);
+	//ft_fprintf(2, " -- TO ALLOC -- %u(%u)\n\n", (unsigned int)_round_size(_size), (unsigned int)_size);
 	_size = _round_size(_size);
 	if (_size <= _M_TINY_MAX_ALC_SIZE)
 		return (_mlc_tiny(_size));
 	else if (_size <= _M_SMALL_MAX_ALC_SIZE)
 		return (_mlc_small(_size));
 	else
-
 		return (_mlc_large(_size));
 }
