@@ -9,11 +9,9 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 		fwd = fwd->fwd;
 	}
 	
-	ft_fprintf(2, "Bck: %p\nMe: %p\nFwd: %p\n\n", bck, _pFree, fwd);
 	_pFree->fwd = fwd;
 	if (fwd != NULL) {
 		fwd->bck = _pFree;
-		bck = fwd->bck;
 	}
 	_pFree->bck = bck;
 	if (bck != NULL) {
@@ -21,6 +19,8 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 	} else {
 		_heap->flst = _pFree;
 	}
+	ft_fprintf(2, "Bck: %p\nMe: %p\nFwd: %p\n\n", bck, _pFree, fwd);
+	debug_flst(_heap);
 }	
 
 void	_cat_flst(t_flst *_pFree, t_heap *_heap)
@@ -41,15 +41,19 @@ void	_cat_flst(t_flst *_pFree, t_heap *_heap)
 		_pFree->size += (fwd->size & _M_SIZE_MASK) + sizeof(t_chunk);
 	}
 	if (bck != NULL) {
-		const void	*bckEnd =  (void *)bck + (bck->size & _M_SIZE_MASK) + sizeof(*bck);
+		const void	*bckEnd =  (void *)bck + (bck->size & _M_SIZE_MASK) + sizeof(t_chunk);
 
 		if (bckEnd == pBegin) {	// Cat with bck
-			;
+			bck->size += (_pFree->size & _M_SIZE_MASK) + sizeof(t_chunk);
+			bck->fwd = fwd;
+			if (fwd)
+				fwd->bck = bck;
 		}
 	}
 	(void)_heap;
 
 }
+
 void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 {
 	pthread_mutex_lock(&arenas[_arenaMask].mtx);
@@ -66,10 +70,10 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	ft_fprintf(2, "\nBefore:\n");
 	debug_flst(heap);
 	_insert_flst(pFree, heap);
-	ft_fprintf(2, "\nInsert:\n");
+	ft_fprintf(2, "\nAfter Insert:\n");
 	debug_flst(heap);
 	_cat_flst(pFree, heap);
-	ft_fprintf(2, "\nCat:\n");
+	ft_fprintf(2, "\nAfter Cat:\n");
 	debug_flst(heap);
 	ft_fprintf(2, "\n");
 

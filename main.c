@@ -24,6 +24,7 @@ int	main(void)
 	free(pT);
 	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
 	free(pT1);
+	pT = malloc(32);
 	ft_fprintf(2, "------- FREEEEEE -----------------------\n");
 	free(pT2);
 
