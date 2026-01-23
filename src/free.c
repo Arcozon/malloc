@@ -9,36 +9,37 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 		fwd = fwd->fwd;
 	}
 	
-	_pFree->fwd = fwd;
 	if (fwd != NULL) {
+		bck =  fwd->bck;
 		fwd->bck = _pFree;
 	}
+	_pFree->fwd = fwd;
 	_pFree->bck = bck;
 	if (bck != NULL) {
 		bck->fwd = _pFree;
 	} else {
 		_heap->flst = _pFree;
 	}
-	ft_fprintf(2, "Bck: %p\nMe: %p\nFwd: %p\n\n", bck, _pFree, fwd);
-	debug_flst(_heap);
+	ft_fprintf(2, "\nBck: %p\n Me: %p\nFwd: %p\n\n", bck, _pFree, fwd);
 }	
 
-void	_cat_flst(t_flst *_pFree, t_heap *_heap)
+void	_cat_flst(t_flst *_pFree)
 {
 	const void	*pBegin = (void *)_pFree;
 	const void	*pEnd = (void *)_pFree + (_pFree->size & _M_SIZE_MASK) + sizeof(t_chunk);
 	t_flst	*bck = _pFree->bck;
 	t_flst	*fwd = _pFree->fwd;
 
-	ft_fprintf(2, "Start: %p	End: %p\n", pBegin, pEnd);
+//	ft_fprintf(2, "Start: %p	End: %p\n", pBegin, pEnd);
 	if (fwd == pEnd) {
 		t_flst *fwd_fwd = fwd->fwd;
 
 		_pFree->fwd = fwd_fwd;
-		if (fwd_fwd) {
+		if (fwd_fwd != NULL) {
 			fwd_fwd->bck = _pFree;
 		}
 		_pFree->size += (fwd->size & _M_SIZE_MASK) + sizeof(t_chunk);
+		fwd = fwd_fwd;
 	}
 	if (bck != NULL) {
 		const void	*bckEnd =  (void *)bck + (bck->size & _M_SIZE_MASK) + sizeof(t_chunk);
@@ -46,12 +47,43 @@ void	_cat_flst(t_flst *_pFree, t_heap *_heap)
 		if (bckEnd == pBegin) {	// Cat with bck
 			bck->size += (_pFree->size & _M_SIZE_MASK) + sizeof(t_chunk);
 			bck->fwd = fwd;
-			if (fwd)
+			if (fwd != NULL)
 				fwd->bck = bck;
 		}
 	}
-	(void)_heap;
+}
 
+
+void	_free_heap(t_heap *_heap, t_heap **_pFheap)
+{
+	ft_fprintf(2, "Is heap NULL\n");
+	if (_heap->flst != NULL) {
+		const t_flst	*flst = _heap->flst;
+		ft_fprintf(2, "Is flst at the start of heap\n");
+		if ((void *)_heap + sizeof(*_heap) == (void *)flst) {
+			const void	*endHeap = (void *)_heap + (_heap->size & _M_SIZE_MASK) + sizeof(*_heap);
+			const void	*endFlst = (void *)flst + (flst->size & _M_SIZE_MASK) + sizeof(t_chunk);
+
+			ft_fprintf(2, "Do they end at the same place\n");
+			ft_fprintf(2, "%p - %p\n", endHeap, endFlst);
+			if (endHeap == endFlst) {
+				t_heap	*fwdHeap = _heap->fwd;
+				t_heap	*bckHeap = _heap->bck;
+				
+				if (fwdHeap != NULL) {
+					fwdHeap->bck = bckHeap;
+				}
+				if (bckHeap != NULL) {
+					bckHeap->fwd = fwdHeap;
+				}
+				else {
+					*_pFheap = fwdHeap;
+				}
+				munmap(_heap, (_heap->size & _M_SIZE_MASK) + sizeof(*_heap));
+				ft_fprintf(2, "-- HEAP FREED --\n\n");
+			}
+		}
+	}
 }
 
 void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
@@ -67,16 +99,17 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	pFree->size &= _M_SIZE_MASK;
 	pFree->size |= _arenaMask | _M_FREE_MASK;
 
-	ft_fprintf(2, "\nBefore:\n");
-	debug_flst(heap);
+//	ft_fprintf(2, "\nBefore:\n");
+//	debug_flst(heap);
 	_insert_flst(pFree, heap);
-	ft_fprintf(2, "\nAfter Insert:\n");
-	debug_flst(heap);
-	_cat_flst(pFree, heap);
-	ft_fprintf(2, "\nAfter Cat:\n");
-	debug_flst(heap);
-	ft_fprintf(2, "\n");
-
+//	ft_fprintf(2, "\nAfter Insert:\n");
+//	debug_flst(heap);
+	_cat_flst(pFree);
+//	ft_fprintf(2, "\nAfter Cat:\n");
+//	debug_flst(heap);
+//	ft_fprintf(2, "\n");
+	_free_heap(heap, &arenas[_arenaMask].heap);
+	debug_flst(arenas[_arenaMask].heap);
 	pthread_mutex_unlock(&arenas[_arenaMask].mtx);
 }
 
