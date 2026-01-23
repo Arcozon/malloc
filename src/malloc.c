@@ -80,8 +80,8 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 		_insert_new_flst(fptr, _size);
 	fptr->size = _size;
 	_del_flst(fptr);
-	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
-	debug_flst(*_pheap);
+//	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
+//	debug_flst(*_pheap);
 	//ft_fprintf(2, "\n");
 	return ((t_chunk *)fptr);
 }

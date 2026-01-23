@@ -20,7 +20,7 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 	} else {
 		_heap->flst = _pFree;
 	}
-	ft_fprintf(2, "\nBck: %p\n Me: %p\nFwd: %p\n\n", bck, _pFree, fwd);
+	//ft_fprintf(2, "\nBck: %p\n Me: %p\nFwd: %p\n\n", bck, _pFree, fwd);
 }	
 
 void	_cat_flst(t_flst *_pFree)
@@ -56,14 +56,14 @@ void	_cat_flst(t_flst *_pFree)
 
 void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 {
-	ft_fprintf(2, "Is heap NULL\n");
+//	ft_fprintf(2, "Is heap NULL\n");
 	if (_heap->flst != NULL) {
 		const t_flst	*flst = _heap->flst;
-		ft_fprintf(2, "Is flst at the start of heap\n");
+//		ft_fprintf(2, "Is flst at the start of heap\n");
 		if ((void *)_heap + sizeof(*_heap) == (void *)flst) {
 			const void	*endHeap = (void *)_heap + (_heap->size & _M_SIZE_MASK) + sizeof(*_heap);
 			const void	*endFlst = (void *)flst + (flst->size & _M_SIZE_MASK) + sizeof(t_chunk);
-
+			debug_flst(_heap);
 			ft_fprintf(2, "Do they end at the same place\n");
 			ft_fprintf(2, "%p - %p\n", endHeap, endFlst);
 			if (endHeap == endFlst) {
@@ -79,7 +79,8 @@ void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 				else {
 					*_pFheap = fwdHeap;
 				}
-				munmap(_heap, (_heap->size & _M_SIZE_MASK) + sizeof(*_heap));
+				if (munmap(_heap, (_heap->size & _M_SIZE_MASK) + sizeof(*_heap)))
+					ft_fprintf(2, "ERROR\n");
 				ft_fprintf(2, "-- HEAP FREED --\n\n");
 			}
 		}
@@ -93,7 +94,7 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	t_heap		*heap = _chunk->pheap;
 	t_flst		*pFree = (void *)_chunk;
 
-	ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
+	//ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
 	pFree->fwd = NULL;
 	pFree->bck = NULL;
 	pFree->size &= _M_SIZE_MASK;
@@ -109,7 +110,7 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 //	debug_flst(heap);
 //	ft_fprintf(2, "\n");
 	_free_heap(heap, &arenas[_arenaMask].heap);
-	debug_flst(arenas[_arenaMask].heap);
+	//debug_flst(arenas[_arenaMask].heap);
 	pthread_mutex_unlock(&arenas[_arenaMask].mtx);
 }
 
@@ -123,7 +124,7 @@ void	free(void *_ptr)
 	if (_ptr)
 	{
 		t_chunk	*bchunk = _ptr - sizeof(*bchunk);
-		ft_fprintf(2,"Tofree: %p\n", bchunk);
+		//ft_fprintf(2,"Tofree: %p\n", bchunk);
 		if ((bchunk->size & _M_DATA_MASK) == ARENA_TINY) {
 			_free_chunk(bchunk, ARENA_TINY);
 		}

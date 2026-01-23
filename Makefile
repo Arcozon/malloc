@@ -9,7 +9,7 @@ S_IMPL	 =  new_heap.c  debug.c
 D_IMPL	 =  impl/
 SRC_IMPL =  $(addprefix $(D_IMPL), $(S_IMPL))
 
-SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c
+SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c  show_alloc_mem.c
 D_SRC	=  src/
 
 D_BUILD = .build/
