@@ -39,8 +39,9 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 
 void	_del_flst(t_flst *_todel)
 {
-	if (_todel->fwd != NULL)
+	if (_todel->fwd != NULL) {
 		_todel->fwd->bck = _todel->bck;
+	}
 	if (_todel->bck != NULL) {
 		_todel->bck = _todel->fwd;
 	}
@@ -83,9 +84,9 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 			 return (NULL);
 		 fptr = _find_in_flst(_size, nheap->flst, NULL);
 	}
-	ft_fprintf(2, "Before Alc:\n");
-	debug_flst(*_pheap);
-	ft_fprintf(2, "Can flst\n");
+//	ft_fprintf(2, "Before Alc:\n");
+//	debug_flst(*_pheap);
+//	ft_fprintf(2, "Can flst\n");
 	_update_flst(fptr, _size);
 	if ((fptr->size & _M_SIZE_MASK) - _size <= sizeof(t_flst)) {
 		fptr->size = _size + sizeof(t_flst) - sizeof(t_chunk);
@@ -94,9 +95,9 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 		fptr->size = _size;
 	}
 	//_del_flst(fptr);
-	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
-	debug_flst(*_pheap);
-	ft_fprintf(2, "\n");
+//	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
+//	debug_flst(*_pheap);
+//	ft_fprintf(2, "\n");
 	return ((t_chunk *)fptr);
 }
 

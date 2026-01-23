@@ -63,9 +63,9 @@ void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 		if ((void *)_heap + sizeof(*_heap) == (void *)flst) {
 			const void	*endHeap = (void *)_heap + (_heap->size & _M_SIZE_MASK) + sizeof(*_heap);
 			const void	*endFlst = (void *)flst + (flst->size & _M_SIZE_MASK) + sizeof(t_chunk);
-			debug_flst(_heap);
-			ft_fprintf(2, "Do they end at the same place\n");
-			ft_fprintf(2, "%p - %p\n", endHeap, endFlst);
+//			debug_flst(_heap);
+//			ft_fprintf(2, "Do they end at the same place\n");
+//			ft_fprintf(2, "%p - %p\n", endHeap, endFlst);
 			if (endHeap == endFlst) {
 				t_heap	*fwdHeap = _heap->fwd;
 				t_heap	*bckHeap = _heap->bck;
