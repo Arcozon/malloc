@@ -7,8 +7,8 @@ int	main(void)
 	char	*pT = malloc(4);
 	char	*pT1 = malloc(8);
 	char	*pT2 = malloc(5);
-	char	*pS = malloc(33);
-	char	*pS1 = malloc(64);
+//	char	*pS = malloc(33);
+//	char	*pS1 = malloc(64);
 
 //	strcpy(pT, "CAC");
 //	strcpy(pT1, "Salut a toi");

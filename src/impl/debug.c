@@ -9,7 +9,7 @@ void	debug_flst(const t_heap *heap)
 	int	cout = 0;
 	while (flst != NULL)
 	{
-		ft_fprintf(2, "[%d]- bck:%p | %p[%u] | fwd: %p\n", cout, flst->bck, flst, (unsigned int)(flst->size & ~_M_DATA_MASK) , flst->fwd);
+		ft_fprintf(2, "[%d]- bck:%14p | %14p[%5u] | fwd: %-14p\n", cout, flst->bck, flst, (unsigned int)(flst->size & ~_M_DATA_MASK) , flst->fwd);
 		++cout;
 		flst = flst->fwd;
 	}

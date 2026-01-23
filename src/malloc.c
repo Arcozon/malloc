@@ -37,7 +37,6 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 	return (bres);
 }
 
-
 void	_del_flst(t_flst *_todel)
 {
 	if (_todel->fwd != NULL)
@@ -50,17 +49,27 @@ void	_del_flst(t_flst *_todel)
 	}
 }
 
-
-void	_insert_new_flst(t_flst *_old, const size_t _size)
+void	_update_flst(t_flst *_old, const size_t _size)
 {
-	t_flst *new = (void *)_old + sizeof(t_chunk) + _size;
+	t_flst *new = _old->fwd;
 
-	new->pheap = _old->pheap;
-	new->bck = _old;
-	new->fwd = _old->fwd;
-	new->size = (_old->size & _M_SIZE_MASK) - _size - sizeof(t_chunk);
-	new->size |= _M_FREE_MASK;
-	_old->fwd = new;
+	if ((_old->size & _M_SIZE_MASK) - _size >= sizeof(t_flst)) {
+		new = (void *)_old + sizeof(t_chunk) + _size;
+
+		new->pheap = _old->pheap;
+		new->bck = _old->bck;
+		new->fwd = _old->fwd;
+		new->size = (_old->size & _M_SIZE_MASK) - _size - sizeof(t_chunk);
+		new->size |= _M_FREE_MASK | (_old->size & _M_ARENA_MASK);
+	}
+	if (_old->fwd)
+		_old->fwd->bck = _old->bck;
+	if (_old->bck != NULL) {
+		_old->bck->fwd = new;
+	}
+	else {
+		_old->pheap->flst = new;
+	}
 }
 
 t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
@@ -74,15 +83,20 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 			 return (NULL);
 		 fptr = _find_in_flst(_size, nheap->flst, NULL);
 	}
-	//ft_fprintf(2, "Before Alc:\n");
-	//debug_flst(*_pheap);
-	if (fptr->size - _size >= sizeof(t_flst))
-		_insert_new_flst(fptr, _size);
-	fptr->size = _size;
-	_del_flst(fptr);
-//	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
-//	debug_flst(*_pheap);
-	//ft_fprintf(2, "\n");
+	ft_fprintf(2, "Before Alc:\n");
+	debug_flst(*_pheap);
+	ft_fprintf(2, "Can flst\n");
+	_update_flst(fptr, _size);
+	if ((fptr->size & _M_SIZE_MASK) - _size <= sizeof(t_flst)) {
+		fptr->size = _size + sizeof(t_flst) - sizeof(t_chunk);
+	}
+	else {
+		fptr->size = _size;
+	}
+	//_del_flst(fptr);
+	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
+	debug_flst(*_pheap);
+	ft_fprintf(2, "\n");
 	return ((t_chunk *)fptr);
 }
 
@@ -91,8 +105,9 @@ void	*_mlc_tiny(const size_t _size)
 	pthread_mutex_lock(&arenas[ARENA_TINY].mtx);
 
 	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_TINY].heap));
-	if (cres != NULL)
-		cres->size = _size | ARENA_TINY;
+	if (cres != NULL) {
+			cres->size |= ARENA_TINY;
+	}
 
 	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));
 	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
@@ -105,7 +120,7 @@ void	*_mlc_small(const size_t _size)
 
 	t_chunk	*cres = _resrv_in_pheaps(_size, &(arenas[ARENA_SMALL].heap));
 	if (cres != NULL)
-		cres->size = _size | ARENA_SMALL;
+		cres->size |= ARENA_SMALL;
 
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
 	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));

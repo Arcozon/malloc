@@ -28,7 +28,8 @@ void	_print_chunk(const t_chunk *_chunk)
 		const void	*endChunk = beginChunk + sizeChunk;
 
 		ft_printf(RED "		");
-		ft_printf("[%p-%p], Size: %u\n", beginChunk, endChunk, (unsigned int)sizeChunk);
+		ft_printf("[%p-%p], Size: %u", beginChunk, endChunk, (unsigned int)sizeChunk);
+		ft_printf(RESET "\n");
 	}
 }
 
@@ -70,7 +71,7 @@ void	show_alloc_mem(void)
 {
 	ft_printf(BLUE "[" BOLD "TINY" RBOLD "]\n" RESET);
 	_show_arena(&arenas[ARENA_TINY]);
-	ft_printf(BLUE "[" BOLD "SMALL" RBOLD "]\n" RESET);
-	_show_arena(&arenas[ARENA_SMALL]);
-	ft_printf(BLUE "[" BOLD "LARGE" RBOLD "]\n" RESET);
+//	ft_printf(BLUE "[" BOLD "SMALL" RBOLD "]\n" RESET);
+//	_show_arena(&arenas[ARENA_SMALL]);
+//	ft_printf(BLUE "[" BOLD "LARGE" RBOLD "]\n" RESET);
 }
