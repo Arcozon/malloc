@@ -54,9 +54,10 @@ void	_update_flst(t_flst *_old, const size_t _size)
 {
 	t_flst *new = _old->fwd;
 
-	if ((_old->size & _M_SIZE_MASK) - _size >= sizeof(t_flst)) {
+	ft_fprintf(2, "OldSize: %u\n", 	(uint32_t)(_old->size & _M_SIZE_MASK));
+	if ((_old->size & _M_SIZE_MASK) >= sizeof(t_flst) + _size) {
 		new = (void *)_old + sizeof(t_chunk) + _size;
-
+//		ft_fprintf(2, "New chain\n");
 		new->pheap = _old->pheap;
 		new->bck = _old->bck;
 		new->fwd = _old->fwd;
@@ -84,15 +85,18 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 			 return (NULL);
 		 fptr = _find_in_flst(_size, nheap->flst, NULL);
 	}
-//	ft_fprintf(2, "Before Alc:\n");
+//	ft_fprintf(2, "\nBefore Alc:\n");
 //	debug_flst(*_pheap);
 //	ft_fprintf(2, "Can flst\n");
 	_update_flst(fptr, _size);
-	if ((fptr->size & _M_SIZE_MASK) - _size <= sizeof(t_flst)) {
-		fptr->size = _size + sizeof(t_flst) - sizeof(t_chunk);
+//	ft_printf("MeSize: %u, OldSize: %u\n", (unsigned int)_size, (unsigned int)(fptr->size & _M_SIZE_MASK) );
+	if ((fptr->size & _M_SIZE_MASK) < sizeof(t_flst) + _size) {
+		fptr->size &= _M_SIZE_MASK;
+//		ft_printf("Size is NOT good for a new lst\n");
 	}
 	else {
 		fptr->size = _size;
+//		ft_printf("Size is good for a new lst\n");
 	}
 	//_del_flst(fptr);
 //	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);

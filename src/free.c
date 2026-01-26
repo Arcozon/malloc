@@ -1,3 +1,4 @@
+#include "ft_printf.h"
 #include "impl_mlc.h"
 
 void	_insert_flst(t_flst *_pFree, t_heap *_heap)
@@ -6,11 +7,11 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 	t_flst	*bck = NULL;
 
 	while (fwd != NULL && fwd < _pFree) {
+		bck = fwd;
 		fwd = fwd->fwd;
 	}
 	
 	if (fwd != NULL) {
-		bck =  fwd->bck;
 		fwd->bck = _pFree;
 	}
 	_pFree->fwd = fwd;
@@ -20,7 +21,7 @@ void	_insert_flst(t_flst *_pFree, t_heap *_heap)
 	} else {
 		_heap->flst = _pFree;
 	}
-	//ft_fprintf(2, "\nBck: %p\n Me: %p\nFwd: %p\n\n", bck, _pFree, fwd);
+//	ft_fprintf(2, "\nBck: %p\n Me: %p\nFwd: %p\n\n", bck, _pFree, fwd);
 }	
 
 void	_cat_flst(t_flst *_pFree)
@@ -109,7 +110,7 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 //	ft_fprintf(2, "\nAfter Cat:\n");
 //	debug_flst(heap);
 //	ft_fprintf(2, "\n");
-	_free_heap(heap, &arenas[_arenaMask].heap);
+//	_free_heap(heap, &arenas[_arenaMask].heap);
 	//debug_flst(arenas[_arenaMask].heap);
 	pthread_mutex_unlock(&arenas[_arenaMask].mtx);
 }
@@ -124,7 +125,7 @@ void	free(void *_ptr)
 	if (_ptr)
 	{
 		t_chunk	*bchunk = _ptr - sizeof(*bchunk);
-		//ft_fprintf(2,"Tofree: %p\n", bchunk);
+//		ft_fprintf(2,"Tofree: %p\n", bchunk);
 		if ((bchunk->size & _M_DATA_MASK) == ARENA_TINY) {
 			_free_chunk(bchunk, ARENA_TINY);
 		}

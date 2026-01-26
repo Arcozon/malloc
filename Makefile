@@ -9,7 +9,7 @@ S_IMPL	 =  new_heap.c  debug.c
 D_IMPL	 =  impl/
 SRC_IMPL =  $(addprefix $(D_IMPL), $(S_IMPL))
 
-SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c  show_alloc_mem.c
+SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c  show_alloc_mem.c  dump_heap.c
 D_SRC	=  src/
 
 D_BUILD = .build/
@@ -53,7 +53,7 @@ re: fclean
 	make all
 
 test:	$(NAME)
-	cc -I. -I$(D_LPRINTF) -o$@ main.c -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE) -L$(D_LPRINTF) -l$(S_LPRINTF)
+	cc -I. $(IFLAGS) -o$@ main.c -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE) -L$(D_LPRINTF) -l$(S_LPRINTF)
 #	cc -L. -lft_malloc -o$@ main.c
 
 
