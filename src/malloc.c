@@ -1,24 +1,25 @@
 #include "impl_mlc.h"
+#include <time.h>
 
-/*__attribute((always_inline, const))
-static inline void	*_m_align_adrr(void *_adrr)
-{
-	if ((uintptr_t)_adrr & _M_ALIGN_MASK)
-		_adrr += _M_ALIGN - ((uintptr_t)_adrr & _M_ALIGN_MASK);	
-	return (_adrr);
-}*/
-
-
-
-t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_flst *_bres)
+t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_flst *_bres, unsigned char *_placeFlst)
 {
 	while (_flst != NULL)
 	{
 		const size_t flstSize = _flst->size & _M_SIZE_MASK;
-		if (flstSize == _size)
+
+		if (flstSize == _size) {
+			*_placeFlst = 1;
 			return ((t_flst  *)_flst);
-		else if (flstSize > _size && (_bres == NULL || flstSize < (_bres->size & _M_SIZE_MASK)))
-			_bres = _flst;
+		}
+		else if (flstSize > _size) {
+			const unsigned int	hasPlaceFlst = (flstSize >= sizeof(t_flst) + _size);
+	
+			if (_bres == NULL || *_placeFlst == 0
+				|| (flstSize < (_bres->size & _M_SIZE_MASK) && hasPlaceFlst)) {
+				_bres = _flst;
+				*_placeFlst = hasPlaceFlst;
+			}
+		}
 		_flst = _flst->fwd;
 	}
 	return ((t_flst *)_bres);
@@ -26,10 +27,11 @@ t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_
 
 t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 {
+	unsigned char placeFlst = 0;
 	t_flst	*bres = NULL;
 
 	while (_heap != NULL) {
-		bres = _find_in_flst(_size, _heap->flst, bres);
+		bres = _find_in_flst(_size, _heap->flst, bres, &placeFlst);
 		if (bres && (bres->size & _M_SIZE_MASK) == _size)
 			break ;
 		_heap = _heap->fwd;
@@ -37,27 +39,13 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 	return (bres);
 }
 
-void	_del_flst(t_flst *_todel)
-{
-	if (_todel->fwd != NULL) {
-		_todel->fwd->bck = _todel->bck;
-	}
-	if (_todel->bck != NULL) {
-		_todel->bck = _todel->fwd;
-	}
-	else {
-		_todel->pheap->flst = _todel->fwd;
-	}
-}
-
 void	_update_flst(t_flst *_old, const size_t _size)
 {
 	t_flst *new = _old->fwd;
 
-	ft_fprintf(2, "OldSize: %u\n", 	(uint32_t)(_old->size & _M_SIZE_MASK));
+	//ft_fprintf(2, "OldSize: %u\n", 	(uint32_t)(_old->size & _M_SIZE_MASK));
 	if ((_old->size & _M_SIZE_MASK) >= sizeof(t_flst) + _size) {
 		new = (void *)_old + sizeof(t_chunk) + _size;
-//		ft_fprintf(2, "New chain\n");
 		new->pheap = _old->pheap;
 		new->bck = _old->bck;
 		new->fwd = _old->fwd;
@@ -83,7 +71,8 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 		t_heap	*nheap = new_heap(_pheap, _size);
 		 if (!nheap)
 			 return (NULL);
-		 fptr = _find_in_flst(_size, nheap->flst, NULL);
+		unsigned char placeFlst = 0;
+		 fptr = _find_in_flst(_size, nheap->flst, NULL, &placeFlst);
 	}
 //	ft_fprintf(2, "\nBefore Alc:\n");
 //	debug_flst(*_pheap);
@@ -134,8 +123,29 @@ void	*_mlc_small(const size_t _size)
 
 void	*_mlc_large(const size_t _size)
 {
-	(void)_size;
-	return (NULL);
+	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
+
+	t_heap	*newLHeap = new_large_heap(_size);
+
+	if (newLHeap == NULL) {
+		pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
+		return (NULL);
+	}
+	void	*res = (void*)newLHeap + sizeof(*newLHeap);
+	t_heap	*prevHeap = arenas[ARENA_LARGE].heap;
+
+	if (prevHeap == NULL) {
+		arenas[ARENA_LARGE].heap = newLHeap;
+	}
+	else {
+		while (prevHeap->fwd != NULL) {
+			prevHeap = prevHeap->fwd;
+		}
+		prevHeap->fwd = newLHeap;
+		newLHeap->bck = prevHeap;
+	}
+	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
+	return (res);
 }
 
 __attribute__((always_inline, const))
@@ -147,6 +157,7 @@ static inline size_t	_round_size(size_t _size)
 		_size = (_size & ~_M_ALIGN_MASK) + _M_ALIGN;
 	return (_size);
 }
+
 void	*malloc(size_t _size)
 {
 	//ft_fprintf(2, " -- TO ALLOC -- %u(%u)\n\n", (unsigned int)_round_size(_size), (unsigned int)_size);

@@ -1,5 +1,6 @@
 #include "ft_printf.h"
 #include "impl_mlc.h"
+#include <sys/mman.h>
 
 t_arena arenas[3] = {
 	[ARENA_TINY] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = NULL},
@@ -63,6 +64,21 @@ t_heap	*new_small_heap(void)
 	return (_new_heap(small_size, ARENA_SMALL));
 }
 
+t_heap	*new_large_heap(const size_t _mSize)
+{
+	const size_t	size = _round_page_size(_mSize);
+	t_heap		*nlHeap = mmap(NULL,size, PROT_READ | PROT_WRITE, 
+			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+	if (nlHeap == MAP_FAILED)
+		return (NULL);
+	nlHeap->fwd = NULL;
+	nlHeap->bck = NULL;
+	nlHeap->size = size - sizeof(*nlHeap);
+	nlHeap->flst = NULL;
+	return (nlHeap);
+}
+
 t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 {
 
@@ -86,8 +102,8 @@ t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 		newHeap->bck = prevHeap;
 		return (newHeap);
 	}
-	else {
-		// BIG PAGE
-		return (NULL);
+	else if (_alloc_size > _M_SMALL_MAX_ALC_SIZE){
+		return (new_large_heap(_alloc_size));
 	}
+	return (NULL);
 }

@@ -102,7 +102,7 @@ void	fdump_heap_ptr(const int _fd, const void *_ptr) {
 
 	_fdump_heap_ptr(_fd, _pchunk->pheap, _pchunk);
 
-	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
+	pthread_mutex_unlock(&arenas[_pchunk->size & _M_ARENA_MASK].mtx);
 }
 
 void	dump_heap_ptr(const void *_ptr) {

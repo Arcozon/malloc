@@ -95,22 +95,22 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	t_heap		*heap = _chunk->pheap;
 	t_flst		*pFree = (void *)_chunk;
 
-	//ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
+	ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
 	pFree->fwd = NULL;
 	pFree->bck = NULL;
 	pFree->size &= _M_SIZE_MASK;
 	pFree->size |= _arenaMask | _M_FREE_MASK;
 
-//	ft_fprintf(2, "\nBefore:\n");
-//	debug_flst(heap);
+	ft_fprintf(2, "\nBefore:\n");
+	debug_flst(heap);
 	_insert_flst(pFree, heap);
-//	ft_fprintf(2, "\nAfter Insert:\n");
-//	debug_flst(heap);
+	ft_fprintf(2, "\nAfter Insert:\n");
+	debug_flst(heap);
 	_cat_flst(pFree);
-//	ft_fprintf(2, "\nAfter Cat:\n");
-//	debug_flst(heap);
+	ft_fprintf(2, "\nAfter Cat:\n");
+	debug_flst(heap);
 //	ft_fprintf(2, "\n");
-//	_free_heap(heap, &arenas[_arenaMask].heap);
+	_free_heap(heap, &arenas[_arenaMask].heap);
 	//debug_flst(arenas[_arenaMask].heap);
 	pthread_mutex_unlock(&arenas[_arenaMask].mtx);
 }
@@ -130,6 +130,7 @@ void	free(void *_ptr)
 			_free_chunk(bchunk, ARENA_TINY);
 		}
 		else if ((bchunk->size & _M_DATA_MASK) == ARENA_SMALL) {
+			ft_printf("Je la");
 			_free_chunk(bchunk, ARENA_SMALL);
 		}
 		else {
