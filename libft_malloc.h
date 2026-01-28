@@ -28,4 +28,7 @@ void	show_alloc_mem(void);
 void	dump_heap_ptr(const void *_ptr);
 void	fdump_heap_ptr(const int _fd, const void *_ptr);
 
+void	dump_large_heap(void);
+void	fdump_large_heap(const int _fd);
+
 #endif

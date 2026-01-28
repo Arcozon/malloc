@@ -9,7 +9,7 @@ S_IMPL	 =  new_heap.c  debug.c
 D_IMPL	 =  impl/
 SRC_IMPL =  $(addprefix $(D_IMPL), $(S_IMPL))
 
-SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c  show_alloc_mem.c  dump_heap.c
+SRC	=  $(SRC_IMPL)  free.c  malloc.c  realloc.c  show_alloc_mem.c  dump_heap.c  dump_large_heap.c
 D_SRC	=  src/
 
 D_BUILD = .build/
@@ -20,7 +20,7 @@ D_LPRINTF = .printf/
 L_PRINTF = $(D_LPRINTF)lib$(S_LPRINTF).a
 
 CC =  cc 
-FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g
+FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g -march=native
 
 D_INC := inc/ . $(D_LPRINTF)
 IFLAGS = $(addprefix -I, $(D_INC))

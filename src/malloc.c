@@ -39,7 +39,7 @@ t_flst	*_find_in_heaps(const size_t _size, t_heap *restrict _heap)
 	return (bres);
 }
 
-void	_update_flst(t_flst *_old, const size_t _size)
+static void	_update_flst(t_flst *_old, const size_t _size)
 {
 	t_flst *new = _old->fwd;
 
@@ -60,6 +60,12 @@ void	_update_flst(t_flst *_old, const size_t _size)
 	else {
 		_old->pheap->flst = new;
 	}
+	if ((_old->size & _M_SIZE_MASK) < sizeof(t_flst) + _size) {
+		_old->size &= _M_SIZE_MASK;
+	}
+	else {
+		_old->size = _size;
+	}
 }
 
 t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
@@ -79,14 +85,6 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 //	ft_fprintf(2, "Can flst\n");
 	_update_flst(fptr, _size);
 //	ft_printf("MeSize: %u, OldSize: %u\n", (unsigned int)_size, (unsigned int)(fptr->size & _M_SIZE_MASK) );
-	if ((fptr->size & _M_SIZE_MASK) < sizeof(t_flst) + _size) {
-		fptr->size &= _M_SIZE_MASK;
-//		ft_printf("Size is NOT good for a new lst\n");
-	}
-	else {
-		fptr->size = _size;
-//		ft_printf("Size is good for a new lst\n");
-	}
 	//_del_flst(fptr);
 //	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
 //	debug_flst(*_pheap);
@@ -143,7 +141,9 @@ void	*_mlc_large(const size_t _size)
 		}
 		prevHeap->fwd = newLHeap;
 		newLHeap->bck = prevHeap;
+		ft_printf("Here\n");
 	}
+//	ft_fprintf(2, "%p <- %p -> %p\n", newLHeap->bck, newLHeap, newLHeap->fwd);
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	return (res);
 }

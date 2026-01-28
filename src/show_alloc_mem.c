@@ -57,7 +57,7 @@ void	_show_arena(t_arena *_arena)
 	const t_heap	*heap = _arena->heap;
 
 	if (heap == NULL) {
-		ft_printf(RED BOLD "	No heap\n" RESET);
+		ft_printf(RED BOLD "	NONE\n" RESET);
 	}
 	for (unsigned int i = 0; heap != NULL; ++i) {
 		_show_heap(heap, i);
