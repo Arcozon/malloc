@@ -48,8 +48,6 @@ void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _s
 		_src += 2;
 	}if (_size & 1) {
 		*(uint8_t *)_dst = *(uint8_t *)_src;
-		_dst += 1;
-		_src += 1;
 	}
 	return (dstSave);
 }
@@ -81,17 +79,17 @@ void	*_need_new_aloc(t_chunk *_oldChunk, void *_oldPtr, size_t _size)
 	return (newPtr);
 }
 
-static void	_move_flst(t_flst *_old, const size_t _n)
+void	_move_flst(t_flst *_old, const size_t _n)
 {
 	t_flst *new = _old->fwd;
 
 	//ft_fprintf(2, "OldSize: %u\n", dd	(uint32_t)(_old->size & _M_SIZE_MASK));
-	if ((_old->size & _M_SIZE_MASK) >= sizeof(t_flst) + _size) {
-		new = (void *)_old + sizeof(t_chunk) + _size;
+	if ((_old->size & _M_SIZE_MASK) >= sizeof(t_flst) + _n) {
+		new = (void *)_old + sizeof(t_chunk) + _n;
 		new->pheap = _old->pheap;
 		new->bck = _old->bck;
 		new->fwd = _old->fwd;
-		new->size = (_old->size & _M_SIZE_MASK) - _size - sizeof(t_chunk);
+		new->size = (_old->size & _M_SIZE_MASK) - _n - sizeof(t_chunk);
 		new->size |= _M_FREE_MASK | (_old->size & _M_ARENA_MASK);
 	}
 	if (_old->fwd)
@@ -102,16 +100,16 @@ static void	_move_flst(t_flst *_old, const size_t _n)
 	else {
 		_old->pheap->flst = new;
 	}
-	if ((_old->size & _M_SIZE_MASK) < sizeof(t_flst) + _size) {
+	if ((_old->size & _M_SIZE_MASK) < sizeof(t_flst) + _n) {
 		_old->size &= _M_SIZE_MASK;
 	}
 	else {
-		_old->size = _size;
+		_old->size = _n;
 	}
 }
 
 __attribute__((always_inline, const))
-static inline size_t	_round_size(size_t _size)
+inline size_t	_round_size(size_t _size)
 {
 	if (!_size)
 		_size =  (sizeof(t_flst) - sizeof(t_chunk));

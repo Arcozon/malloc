@@ -34,6 +34,7 @@ void	test_defrag1(void) {
 
 int main(void)
 {
+	test_dump_heap();
 	void *p0 = malloc(256);
 	void *p1 = malloc(256);
 	void *p2 = malloc(256);
