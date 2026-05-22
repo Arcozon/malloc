@@ -3,6 +3,7 @@ ifeq ($(HOSTTYPE),)
 endif
 
 NAME =  libft_malloc_$(HOSTTYPE).so
+
 NAME_SIMLINK = libft_malloc.so
 
 S_IMPL	 =  new_heap.c  debug.c
@@ -18,6 +19,11 @@ OBJ =  $(addprefix $(D_BUILD), $(SRC:.c=.o))
 S_LPRINTF = ftprintf
 D_LPRINTF = .printf/
 L_PRINTF = $(D_LPRINTF)lib$(S_LPRINTF).a
+
+SRC_TEST  =  main.c  realloc.c
+D_TEST	  =  srcTest/
+S_TEST	  =  $(addprefix $(D_TEST), $(SRC_TEST))
+TEST_NAME =  test
 
 CC =  cc 
 FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g -march=native
@@ -47,18 +53,16 @@ clean:
 	$(RM) $(D_BUILD)
 
 fclean: clean
-	$(RM) $(NAME) $(NAME_SIMLINK)
+	$(RM) $(NAME) $(NAME_SIMLINK) $(TEST_NAME)
 
 re: fclean
-	make all
+	@$(MAKE) all
 
-test:	$(NAME)
-	cc -I. $(IFLAGS) -o$@ main.c -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE) -L$(D_LPRINTF) -l$(S_LPRINTF)
-#	cc -L. -lft_malloc -o$@ main.c
-
+$(TEST_NAME):	$(NAME) $(S_TEST)
+	cc -I. $(IFLAGS) -o$@  -L. -Wl,-rpath,$(shell pwd) -lft_malloc_$(HOSTTYPE) -L$(D_LPRINTF) -l$(S_LPRINTF) $(S_TEST) -o$@
 
 DEPS = $(addprefix $(D_BUILD), $(SRC:.c=.d))
 -include $(DEPS)
 
-.PHONY: re fclean clean all test
+.PHONY: re fclean clean all
 

@@ -4,13 +4,12 @@
 #include <stdint.h>
 
 __attribute__((__always_inline__))
-void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _size)
+static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, size_t _size)
 {
 	void		*dstSave = _dst;
 
 # ifdef __AVX512F__
-	const size_t	size512 = (_size / 64);
-	for (size_t i = 0; i < size512; ++i) {
+	for (; _size >= 64; size -= 64) {
 		__m512i data512 = _mm512_loadu_si512 (_src);
 		_mm512_storeu_si512(_src, data512);
 		_dst += 64;
@@ -18,7 +17,7 @@ void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _s
 	}
 # endif
 # ifdef __AVX2__
-	if (_size & 32) {
+	for (; _size >= 32; _size -= 32) {
 		__m256i data256 = _mm256_loadu_si256(_src);
 		_mm256_storeu_si256(_dst, data256);
 		_dst += 32;
@@ -26,7 +25,7 @@ void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _s
 	}
 # endif
 # ifdef __AVX__
-	if (_size & 16) {
+	for (; _size >= 16; _size -= 16) {
 		__m128i data128 = _mm_loadu_si128(_src);
 		_mm_storeu_si128(_dst, data128);
 		_dst += 16;
@@ -43,7 +42,7 @@ void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _s
 		_dst += 4;
 		_src += 4;
 	}if (_size & 2) {
-		*(uint64_t *)_dst = *(uint16_t *)_src;
+		*(uint16_t *)_dst = *(uint16_t *)_src;
 		_dst += 2;
 		_src += 2;
 	}if (_size & 1) {
@@ -53,7 +52,7 @@ void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, const size_t _s
 }
 
 __attribute__((always_inline, const))
-static int _get_arena(const size_t _size)
+static inline int _get_arena(const size_t _size)
 {
 	if (_size <= _M_TINY_MAX_ALC_SIZE){
 		return (ARENA_TINY);
@@ -69,10 +68,10 @@ void	*_need_new_aloc(t_chunk *_oldChunk, void *_oldPtr, size_t _size)
 {
 	const size_t	oldSize = (_oldChunk->size & _M_SIZE_MASK);
 	const size_t	sizeToCpy = (_size < oldSize) ? _size : oldSize;
-	void	*newPtr = malloc(_size);
+	void		*newPtr = malloc(_size);
 
 	if (newPtr == NULL)
-		return (_oldPtr);
+		return (NULL);
 	
 	_ft_align_memcpy(_oldPtr, newPtr, sizeToCpy);
 	free(_oldPtr);
@@ -88,7 +87,7 @@ void	_move_flst(t_flst *_old, const size_t _n)
 		new = (void *)_old + sizeof(t_chunk) + _n;
 		new->pheap = _old->pheap;
 		new->bck = _old->bck;
-		new->fwd = _old->fwd;
+		new->fwd = _old->fwd; 
 		new->size = (_old->size & _M_SIZE_MASK) - _n - sizeof(t_chunk);
 		new->size |= _M_FREE_MASK | (_old->size & _M_ARENA_MASK);
 	}
@@ -136,10 +135,26 @@ void	*_extand_chunk(t_chunk *_chunk, const size_t _size) {
 		return (NULL);
 	}
 
-	
-
 	pthread_mutex_unlock(&arenas[idArena].mtx);
 	return ((void *)_chunk + sizeof(*_chunk));
+}
+
+void	*_realloc_large(t_chunk *_oldChunk, const size_t _size) {
+	t_large_heap * const	oldHeap = ((void *)_oldChunk) - (sizeof(oldHeap) - sizeof(*_oldChunk));
+	void	 		*oldPtr = (void *)_oldChunk + sizeof(*_oldChunk);
+
+
+	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
+	if ((oldHeap->size >= _size)) {
+		oldHeap->used = _size;
+		pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
+		return ((void *)oldPtr);
+	}
+	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
+	void	*newAlloc = _mlc_large(_size);
+	_ft_align_memcpy(newAlloc, oldPtr, _size);
+	free(oldPtr);
+	return (newAlloc);
 }
 
 void	*realloc(void *_ptr, size_t _size)
@@ -153,13 +168,15 @@ void	*realloc(void *_ptr, size_t _size)
 	}
 	
 	t_chunk		*chunk = _ptr - sizeof(*chunk);
+	const int	oldArena = (chunk->size & _M_ARENA_MASK);
 	const int	newArena = _get_arena(_size);
 
-	if (newArena != (chunk->size & _M_ARENA_MASK)) {
+	if (oldArena == ARENA_LARGE) {
+		return (_realloc_large(chunk, _size));
+	}
+	if (newArena != oldArena) {
 		return (_need_new_aloc(chunk, _ptr, _size));
 	}
-
-
 	if (_size <= chunk->size || _extand_chunk(chunk, _size) != NULL) {
 		return (_ptr);
 	}

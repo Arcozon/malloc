@@ -67,16 +67,16 @@ t_heap	*new_small_heap(void)
 t_heap	*new_large_heap(const size_t _mSize)
 {
 	const size_t	size = _round_page_size(_mSize);
-	t_heap		*nlHeap = mmap(NULL, size, PROT_READ | PROT_WRITE, 
+	t_large_heap	*nlHeap = mmap(NULL, size, PROT_READ | PROT_WRITE, 
 			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
 	if (nlHeap == MAP_FAILED)
 		return (NULL);
 	nlHeap->fwd = NULL;
 	nlHeap->bck = NULL;
+	nlHeap->used = _mSize;	
 	nlHeap->size = (size - sizeof(*nlHeap)) | ARENA_LARGE;
-	nlHeap->flst = NULL;
-	return (nlHeap);
+	return ((t_heap *)nlHeap);
 }
 
 t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)

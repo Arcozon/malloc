@@ -70,14 +70,13 @@ static void	_update_flst(t_flst *_old, const size_t _size)
 
 t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 {
+	unsigned char	placeFlst = 0;
 	t_flst	*fptr = _find_in_heaps(_size, *_pheap);
-
 
 	if (!fptr) {
 		t_heap	*nheap = new_heap(_pheap, _size);
 		 if (!nheap)
 			 return (NULL);
-		unsigned char placeFlst = 0;
 		 fptr = _find_in_flst(_size, nheap->flst, NULL, &placeFlst);
 	}
 //	ft_fprintf(2, "\nBefore Alc:\n");
@@ -131,18 +130,14 @@ void	*_mlc_large(const size_t _size)
 	}
 	void	*res = (void*)newLHeap + sizeof(*newLHeap);
 	t_heap	*prevHeap = arenas[ARENA_LARGE].heap;
+	t_heap	**pPrevHeapFwd = &arenas[ARENA_LARGE].heap;
 
-	if (prevHeap == NULL) {
-		arenas[ARENA_LARGE].heap = newLHeap;
+	while (prevHeap) {
+		pPrevHeapFwd = &prevHeap->fwd;
+		prevHeap = prevHeap->fwd;
 	}
-	else {
-		while (prevHeap->fwd != NULL) {
-			prevHeap = prevHeap->fwd;
-		}
-		prevHeap->fwd = newLHeap;
-		newLHeap->bck = prevHeap;
-		ft_printf("Here\n");
-	}
+	*pPrevHeapFwd = newLHeap;
+	newLHeap->bck = prevHeap;
 //	ft_fprintf(2, "%p <- %p -> %p\n", newLHeap->bck, newLHeap, newLHeap->fwd);
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	return (res);

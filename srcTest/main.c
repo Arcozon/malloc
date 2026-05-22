@@ -2,6 +2,7 @@
 #include "impl_mlc.h"
 #include "libft_malloc.h"
 #include <string.h>
+void	test_realloc(void);
 
 void test_dump_heap(void) {
   const size_t Nalc = 255;
@@ -31,10 +32,7 @@ void	test_defrag1(void) {
   dump_heap_ptr(p0);
 }
 
-
-int main(void)
-{
-	test_dump_heap();
+void	test_large_heap(void) {
 	void *p0 = malloc(256);
 	void *p1 = malloc(256);
 	void *p2 = malloc(256);
@@ -45,5 +43,12 @@ int main(void)
 	dump_large_heap();
 	free(p2);
 	dump_large_heap();	
-	test_defrag1();
+}
+
+int main(void)
+{
+	//test_dump_heap();
+	//test_large_heap();
+	//test_defrag1();
+	test_realloc();
 }

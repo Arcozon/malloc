@@ -54,6 +54,7 @@ enum
 
 typedef struct s_arena	t_arena;
 typedef struct s_heap	t_heap;
+typedef struct s_large_heap	t_large_heap;
 typedef struct s_chunk	t_chunk;
 typedef struct s_flst	t_flst;
 
@@ -64,6 +65,12 @@ struct s_heap {
 	size_t	size;
 }	__attribute__((aligned(_M_ALIGN)));
 
+struct s_large_heap {
+	t_heap	*fwd;
+	t_heap	*bck;
+	size_t	used;
+	size_t	size;
+}	__attribute__((aligned(_M_ALIGN)));
 
 struct s_arena {
 	pthread_mutex_t	mtx;	
@@ -89,6 +96,7 @@ t_heap	*new_tiny_heap(void);
 t_heap	*new_small_heap(void);
 t_heap	*new_large_heap(const size_t _mSize);
 
+void	*_mlc_large(const size_t _size);
 
 void	debug_flst(const t_heap *heap);
 
