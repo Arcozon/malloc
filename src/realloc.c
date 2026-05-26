@@ -151,8 +151,9 @@ void	*_realloc_large(t_chunk *_oldChunk, const size_t _size) {
 		return ((void *)oldPtr);
 	}
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
-	void	*newAlloc = _mlc_large(_size);
-	_ft_align_memcpy(newAlloc, oldPtr, _size);
+	void	*newAlloc = _mlc_large_mutex_locked(_size);
+	if (newAlloc != NULL)
+		_ft_align_memcpy(newAlloc, oldPtr, _size);
 	free(oldPtr);
 	return (newAlloc);
 }

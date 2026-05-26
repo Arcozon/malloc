@@ -96,7 +96,7 @@ t_heap	*new_tiny_heap(void);
 t_heap	*new_small_heap(void);
 t_heap	*new_large_heap(const size_t _mSize);
 
-void	*_mlc_large(const size_t _size);
+void	*_mlc_large_mutex_locked(const size_t _size);
 
 void	debug_flst(const t_heap *heap);
 

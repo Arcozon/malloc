@@ -118,9 +118,10 @@ void	*_mlc_small(const size_t _size)
 	return ((void *)cres + sizeof(*cres));
 }
 
-void	*_mlc_large(const size_t _size)
+
+
+void	*_mlc_large_mutex_locked(const size_t _size)
 {
-	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
 
 	t_heap	*newLHeap = new_large_heap(_size);
 
@@ -139,6 +140,14 @@ void	*_mlc_large(const size_t _size)
 	*pPrevHeapFwd = newLHeap;
 	newLHeap->bck = prevHeap;
 //	ft_fprintf(2, "%p <- %p -> %p\n", newLHeap->bck, newLHeap, newLHeap->fwd);
+	return (res);
+}
+
+static inline void	*_mlc_large(const size_t _size) {
+	void	*res;
+	
+	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
+	res = _mlc_large_mutex_locked(_size);
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	return (res);
 }
@@ -148,9 +157,10 @@ static inline size_t	_round_size(size_t _size)
 {
 	if (!_size)
 		_size =  (sizeof(t_flst) - sizeof(t_chunk));
-	if (_size % _M_ALIGN)
-		_size = (_size & ~_M_ALIGN_MASK) + _M_ALIGN;
-	return (_size);
+	///if (_size % _M_ALIGN)
+	//	_size = (_size & ~_M_ALIGN_MASK) + _M_ALIGN;
+	//return (_size);
+	return ((_size + (_M_ALIGN - 1)) & ~_M_ALIGN_MASK);
 }
 
 void	*malloc(size_t _size)
