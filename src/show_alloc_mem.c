@@ -1,5 +1,6 @@
 #include "ft_printf.h"
 #include "impl_mlc.h"
+#include "libft_malloc.h"
 #include "show_mem.h"
 
 
@@ -71,7 +72,8 @@ void	show_alloc_mem(void)
 {
 	ft_printf(BLUE "[" BOLD "TINY" RBOLD "]\n" RESET);
 	_show_arena(&arenas[ARENA_TINY]);
-//	ft_printf(BLUE "[" BOLD "SMALL" RBOLD "]\n" RESET);
-//	_show_arena(&arenas[ARENA_SMALL]);
-//	ft_printf(BLUE "[" BOLD "LARGE" RBOLD "]\n" RESET);
+	ft_printf(BLUE "[" BOLD "SMALL" RBOLD "]\n" RESET);
+	_show_arena(&arenas[ARENA_SMALL]);
+	//ft_printf(BLUE "[" BOLD "LARGE" RBOLD "]\n" RESET);
+	dump_large_heap();
 }
