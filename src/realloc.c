@@ -11,7 +11,7 @@ static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, s
 # ifdef __AVX512F__
 	for (; _size >= 64; size -= 64) {
 		__m512i data512 = _mm512_loadu_si512 (_src);
-		_mm512_storeu_si512(_src, data512);
+		_mm512_storeu_si512(_drc, data512);
 		_dst += 64;
 		_src += 64;
 	}
@@ -32,7 +32,7 @@ static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, s
 		_src += 16;
 	}
 # endif
-	if (_size & 8) {
+	for (; _size >= 8; _size -= 8) {
 		*(uint64_t *)_dst = *(uint64_t *)_src;
 		_dst += 8;
 		_src += 8;
@@ -73,7 +73,7 @@ void	*_need_new_aloc(t_chunk *_oldChunk, void *_oldPtr, size_t _size)
 	if (newPtr == NULL)
 		return (NULL);
 	
-	_ft_align_memcpy(_oldPtr, newPtr, sizeToCpy);
+	_ft_align_memcpy(newPtr, _oldPtr, sizeToCpy);
 	free(_oldPtr);
 	return (newPtr);
 }
@@ -107,17 +107,8 @@ void	_move_flst(t_flst *_old, const size_t _n)
 	}
 }
 
-__attribute__((always_inline, const))
-inline size_t	_round_size(size_t _size)
-{
-	if (!_size)
-		_size =  (sizeof(t_flst) - sizeof(t_chunk));
-	if (_size % _M_ALIGN)
-		_size = (_size & ~_M_ALIGN_MASK) + _M_ALIGN;
-	return (_size);
-}
-
-void	*_extand_chunk(t_chunk *_chunk, const size_t _size) {
+__attribute__((always_inline))
+static inline void	*_extand_chunk(t_chunk *_chunk, const size_t _size) {
 	const int idArena = _chunk->size & _M_ARENA_MASK;
 
 	if (idArena == ARENA_LARGE) {
@@ -150,10 +141,11 @@ void	*_realloc_large(t_chunk *_oldChunk, const size_t _size) {
 		pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 		return ((void *)oldPtr);
 	}
-	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	void	*newAlloc = _mlc_large_mutex_locked(_size);
-	if (newAlloc != NULL)
-		_ft_align_memcpy(newAlloc, oldPtr, _size);
+	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
+	if (newAlloc == NULL)
+		return (NULL);
+	_ft_align_memcpy(newAlloc, oldPtr, _size);
 	free(oldPtr);
 	return (newAlloc);
 }

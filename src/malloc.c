@@ -1,3 +1,4 @@
+#include "ft_printf.h"
 #include "impl_mlc.h"
 #include <time.h>
 
@@ -122,25 +123,22 @@ void	*_mlc_small(const size_t _size)
 
 void	*_mlc_large_mutex_locked(const size_t _size)
 {
-
-	t_heap	*newLHeap = new_large_heap(_size);
+	t_large_heap	*newLHeap = new_large_heap(_size);
 
 	if (newLHeap == NULL) {
-		pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 		return (NULL);
 	}
-	void	*res = (void*)newLHeap + sizeof(*newLHeap);
-	t_heap	*prevHeap = arenas[ARENA_LARGE].heap;
-	t_heap	**pPrevHeapFwd = &arenas[ARENA_LARGE].heap;
+	if (!arenas[ARENA_LARGE].heap) {
+		arenas[ARENA_LARGE].heap = (t_heap *)newLHeap;
+	} else {
+		t_large_heap	*heap = (t_large_heap *)arenas[ARENA_LARGE].heap;
 
-	while (prevHeap) {
-		pPrevHeapFwd = &prevHeap->fwd;
-		prevHeap = prevHeap->fwd;
+		while (heap->fwd)
+			heap = heap->fwd;
+		heap->fwd = newLHeap;
+		newLHeap->bck = heap;
 	}
-	*pPrevHeapFwd = newLHeap;
-	newLHeap->bck = prevHeap;
-//	ft_fprintf(2, "%p <- %p -> %p\n", newLHeap->bck, newLHeap, newLHeap->fwd);
-	return (res);
+	return ((void*)newLHeap + sizeof(*newLHeap));
 }
 
 static inline void	*_mlc_large(const size_t _size) {

@@ -34,7 +34,9 @@ void	test_defrag1(void) {
 
 void	test_large_heap(void) {
 	void *p0 = malloc(256);
+	dump_large_heap();	
 	void *p1 = malloc(256);
+	dump_large_heap();	
 	void *p2 = malloc(256);
 	dump_large_heap();	
 	free(p0);
@@ -48,7 +50,7 @@ void	test_large_heap(void) {
 int main(void)
 {
 	//test_dump_heap();
-	//test_large_heap();
+	test_large_heap();
 	//test_defrag1();
-	test_realloc();
+	//test_realloc();
 }

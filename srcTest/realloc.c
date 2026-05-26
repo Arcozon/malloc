@@ -31,9 +31,19 @@ void	test_realloc(void) {
 	const char longStr[] = "According to all known laws of aviation, there is no way a bee should be able to fly.\n\
 Its wings are too small to get its fat little body off the ground.\n";
 
-
-	CALL_TEST_ONE_REALLOC(16, 16, longStr);
 	CALL_TEST_ONE_REALLOC(16, 0, longStr);
-	CALL_TEST_ONE_REALLOC(16, 32, longStr);
-	CALL_TEST_ONE_REALLOC(16, 128, longStr);
+	CALL_TEST_ONE_REALLOC(16, 16, longStr);
+	CALL_TEST_ONE_REALLOC(16, 33, longStr);
+	CALL_TEST_ONE_REALLOC(16, 129, longStr);
+
+	show_alloc_mem();return;
+	CALL_TEST_ONE_REALLOC(32, 0, longStr);
+	CALL_TEST_ONE_REALLOC(32, 16, longStr);
+	CALL_TEST_ONE_REALLOC(32, 33, longStr);
+	CALL_TEST_ONE_REALLOC(32, 129, longStr);
+
+	CALL_TEST_ONE_REALLOC(129, 0, longStr);
+	CALL_TEST_ONE_REALLOC(129, 16, longStr);
+	CALL_TEST_ONE_REALLOC(129, 33, longStr);
+	CALL_TEST_ONE_REALLOC(129, 129, longStr);
 }

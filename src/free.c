@@ -121,11 +121,11 @@ void	_free_large(void *toFree)
 //	ft_printf("Free large\n");
 	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
 	
-	t_heap	*heap = toFree - sizeof(*heap);	
-	t_heap	*fwd = heap->fwd;	
-	t_heap	*bck = heap->bck;	
+	t_large_heap	*heap = toFree - sizeof(*heap);	
+	t_large_heap	*fwd = heap->fwd;	
+	t_large_heap	*bck = heap->bck;	
 	
-//	ft_fprintf(2, "%p <- %p -> %p\n", bck, heap, fwd);
+	 //ft_fprintf(2, "Free: %p <- %p -> %p\n", bck, heap, fwd);
 	if (fwd != NULL) {
 		fwd->bck = bck;
 	}
@@ -133,7 +133,7 @@ void	_free_large(void *toFree)
 		bck->fwd = fwd;
 	}
 	else {
-		arenas[ARENA_LARGE].heap = fwd;
+		arenas[ARENA_LARGE].heap = (t_heap *)fwd;
 	}
 	
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);

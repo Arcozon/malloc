@@ -64,7 +64,7 @@ t_heap	*new_small_heap(void)
 	return (_new_heap(small_size, ARENA_SMALL));
 }
 
-t_heap	*new_large_heap(const size_t _mSize)
+t_large_heap	*new_large_heap(const size_t _mSize)
 {
 	const size_t	size = _round_page_size(_mSize);
 	t_large_heap	*nlHeap = mmap(NULL, size, PROT_READ | PROT_WRITE, 
@@ -76,7 +76,7 @@ t_heap	*new_large_heap(const size_t _mSize)
 	nlHeap->bck = NULL;
 	nlHeap->used = _mSize;	
 	nlHeap->size = (size - sizeof(*nlHeap)) | ARENA_LARGE;
-	return ((t_heap *)nlHeap);
+	return (nlHeap);
 }
 
 t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
@@ -103,7 +103,7 @@ t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 		return (newHeap);
 	}
 	else if (_alloc_size > _M_SMALL_MAX_ALC_SIZE){
-		return (new_large_heap(_alloc_size));
+		return ((t_heap *)new_large_heap(_alloc_size));
 	}
 	return (NULL);
 }

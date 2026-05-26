@@ -66,8 +66,8 @@ struct s_heap {
 }	__attribute__((aligned(_M_ALIGN)));
 
 struct s_large_heap {
-	t_heap	*fwd;
-	t_heap	*bck;
+	t_large_heap	*fwd;
+	t_large_heap	*bck;
 	size_t	used;
 	size_t	size;
 }	__attribute__((aligned(_M_ALIGN)));
@@ -94,7 +94,7 @@ extern t_arena	arenas[3];
 t_heap	*new_heap(t_heap **restrict _pheap, const size_t _alloc_size);
 t_heap	*new_tiny_heap(void);
 t_heap	*new_small_heap(void);
-t_heap	*new_large_heap(const size_t _mSize);
+t_large_heap	*new_large_heap(const size_t _mSize);
 
 void	*_mlc_large_mutex_locked(const size_t _size);
 
