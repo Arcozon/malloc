@@ -82,8 +82,8 @@ void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 					*_pFheap = fwdHeap;
 				}
 				if (munmap(_heap, (_heap->size & _M_SIZE_MASK) + sizeof(*_heap)))
-					ft_fprintf(2, "ERROR\n");
-				ft_fprintf(2, "-- HEAP FREED --\n\n");
+					ft_fprintf(STDERR_FILENO, "ERROR: munmap failure\n");
+				//ft_fprintf(2, "-- HEAP FREED --\n\n");
 			}
 		}
 	}
@@ -139,7 +139,7 @@ void	_free_large(void *toFree)
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 
 	if (munmap(heap, (heap->size & _M_SIZE_MASK) + sizeof(*heap)) != 0)
-		ft_fprintf(STDERR_FILENO, "MUNMAP FAIL %p\n", heap);
+		ft_fprintf(STDERR_FILENO, "ERROR: mmap failure %p\n", heap);
 }
 
 void	free(void *_ptr)
