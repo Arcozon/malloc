@@ -19,7 +19,7 @@ static inline void	_populate_cLine(char cLine[LINE_LEN], const char _c) {
 		cLine[i] = _c;
 }
 
-void	_fprint_zone(const int _fd, const char *_color, const char _c, const size_t _nc, const size_t _iLine)
+static void	_fprint_zone(const int _fd, const char *_color, const char _c, const size_t _nc, const size_t _iLine)
 {
 	static char	cLine[LINE_LEN + 1] = {0};
 
@@ -47,7 +47,7 @@ void	_fprint_zone(const int _fd, const char *_color, const char _c, const size_t
 
 }
 
-void	_fdump_heap_ptr(const int _fd, const t_heap *_heap, const t_chunk *_ptr) {
+static void	_fdump_heap_ptr(const int _fd, const t_heap *_heap, const t_chunk *_ptr) {
 	const size_t	hChunkSize = (_heap->size + sizeof(*_heap)) / sizeof(t_chunk);
 	const t_chunk	*iptr = (t_chunk *)_heap;
 	size_t		i = 0;
