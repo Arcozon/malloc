@@ -59,7 +59,7 @@ void	test_large_heap(void) {
 int main(void)
 {
 //	test_dump_heap();
-	test_large_heap();
+//	test_large_heap();
 //	test_defrag1();
-//	test_realloc();
+	test_realloc();
 }

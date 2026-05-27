@@ -71,7 +71,6 @@ t_large_heap	*new_large_heap(const size_t _mSize)
 	t_large_heap	*nlHeap = mmap(NULL, size, PROT_READ | PROT_WRITE, 
 			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
-	ft_printf("%u \n", (unsigned int)_mSize);
 	if (nlHeap == MAP_FAILED)
 		return (NULL);
 	nlHeap->fwd = NULL;

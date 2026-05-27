@@ -130,23 +130,21 @@ static inline void	*_extand_chunk(t_chunk *_chunk, const size_t _size) {
 	return ((void *)_chunk + sizeof(*_chunk));
 }
 
-void	*_realloc_large(t_chunk *_oldChunk, const size_t _size) {
-	t_large_heap * const	oldHeap = ((void *)_oldChunk) - (sizeof(oldHeap) - sizeof(*_oldChunk));
-	void	 		*oldPtr = (void *)_oldChunk + sizeof(*_oldChunk);
-
+void	*_realloc_large(void *_oldPtr, const size_t _size) {
+	t_large_heap * const	oldHeap = _oldPtr - sizeof(*oldHeap);
 
 	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
-	if ((oldHeap->size >= _size)) {
+	if (((oldHeap->size & _M_SIZE_MASK) - sizeof(*oldHeap) >= _size)) {
 		oldHeap->used = _size;
 		pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
-		return ((void *)oldPtr);
+		return (_oldPtr);
 	}
 	void	*newAlloc = _mlc_large_mutex_locked(_size);
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	if (newAlloc == NULL)
 		return (NULL);
-	_ft_align_memcpy(newAlloc, oldPtr, _size);
-	free(oldPtr);
+	_ft_align_memcpy(newAlloc, _oldPtr, _size);
+	free(_oldPtr);
 	return (newAlloc);
 }
 
@@ -165,7 +163,7 @@ void	*realloc(void *_ptr, size_t _size)
 	const int	newArena = _get_arena(_size);
 
 	if (oldArena == ARENA_LARGE) {
-		return (_realloc_large(chunk, _size));
+		return (_realloc_large(_ptr, _size));
 	}
 	if (newArena != oldArena) {
 		return (_need_new_aloc(chunk, _ptr, _size));

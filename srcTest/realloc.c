@@ -17,12 +17,12 @@ void	test_one_realloc(const size_t size, const size_t resize, const void *src, c
 	if (!alloc)	return ;
 	memcpy(alloc, src, contentSize);
 	show_alloc_mem();
-	printf("  - Content: %.*s\n", (int)contentSize, (char *)alloc);
+	printf("  - Content:\"%.*s\"\n", (int)contentSize, (char *)alloc);
 	alloc = realloc(alloc, resize);
 	show_alloc_mem();
 	printf("  - Realloc from %u to %u: %p\n", (unsigned int)size, (unsigned int)resize, alloc);
 	if (!alloc)	return;
-	printf("  - Content: %.*s\n", (int)sizeContentRealloc, (char *)alloc);
+	printf("  - Content: \"%.*s\"\n", (int)sizeContentRealloc, (char *)alloc);
 	free(alloc);
 }
 
