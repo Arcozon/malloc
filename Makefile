@@ -47,13 +47,14 @@ $(OBJ): $(D_BUILD)%.o:	$(D_SRC)%.c
 	$(CC) $(FLAGS) $(IFLAGS) -c $< -o $@ 
 
 $(L_PRINTF):
-	@$(MAKE) $(D_LPRINTF)
+	@$(MAKE) -C $(D_LPRINTF)
 
 clean:
 	$(RM) $(D_BUILD)
 
 fclean: clean
 	$(RM) $(NAME) $(NAME_SIMLINK) $(TEST_NAME)
+	@$(MAKE) -C $(D_LPRINTF) fclean
 
 re: fclean
 	@$(MAKE) all
