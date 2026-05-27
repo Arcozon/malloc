@@ -161,14 +161,13 @@ static inline size_t	_round_size(size_t _size)
 	return ((_size + (_M_ALIGN - 1)) & ~_M_ALIGN_MASK);
 }
 
-void	*malloc(size_t _size)
-{
-	//ft_fprintf(2, " -- TO ALLOC -- %u(%u)\n\n", (unsigned int)_round_size(_size), (unsigned int)_size);
-	_size = _round_size(_size);
-	if (_size <= _M_TINY_MAX_ALC_SIZE)
-		return (_mlc_tiny(_size));
-	else if (_size <= _M_SMALL_MAX_ALC_SIZE)
-		return (_mlc_small(_size));
+void	*malloc(const size_t _size) {
+	const size_t rounded_size = _round_size(_size);
+
+	if (rounded_size <= _M_TINY_MAX_ALC_SIZE)
+		return (_mlc_tiny(rounded_size));
+	else if (rounded_size <= _M_SMALL_MAX_ALC_SIZE)
+		return (_mlc_small(rounded_size));
 	else
 		return (_mlc_large(_size));
 }
