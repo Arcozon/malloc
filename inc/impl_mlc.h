@@ -27,7 +27,7 @@
 
 # define _M_MIN_ALC_SIZE	(sizeof(t_flst) - sizeof(t_chunk))
 
-# define _M_TINY_MAX_ALC_SIZE	32UL
+# define _M_TINY_MAX_ALC_SIZE	16UL
 
 # define _M_SMALL_MIN_ALC_SIZE	(_M_TINY_MAX_ALC_SIZE + 1UL)
 # define _M_SMALL_MAX_ALC_SIZE	128UL

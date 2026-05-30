@@ -4,13 +4,13 @@
 #include <stdint.h>
 
 __attribute__((__always_inline__))
-static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, size_t _size)
-{
+static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, size_t _size) {
 	void		*dstSave = _dst;
 
 # ifdef __AVX512F__
 	for (; _size >= 64; size -= 64) {
 		__m512i data512 = _mm512_loadu_si512 (_src);
+		ft_fprintf(2, "aa \n");
 		_mm512_storeu_si512(_drc, data512);
 		_dst += 64;
 		_src += 64;
@@ -140,10 +140,12 @@ void	*_realloc_large(void *_oldPtr, const size_t _size) {
 		return (_oldPtr);
 	}
 	void	*newAlloc = _mlc_large_mutex_locked(_size);
+	const size_t	toCpy = (oldHeap->used > _size) ? _size : oldHeap->used;
+
 	pthread_mutex_unlock(&arenas[ARENA_LARGE].mtx);
 	if (newAlloc == NULL)
 		return (NULL);
-	_ft_align_memcpy(newAlloc, _oldPtr, _size);
+	_ft_align_memcpy(newAlloc, _oldPtr, toCpy);
 	free(_oldPtr);
 	return (newAlloc);
 }
