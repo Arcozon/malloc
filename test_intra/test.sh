@@ -2,6 +2,7 @@
 binDir='./bin/'
 srcDir='./src/'
 baseTestName="./test"
+runSh=$binDir"run_linux.sh"
 
 compile_all_test() {
 
@@ -23,7 +24,6 @@ exec_grep() {
 }
 
 test_one() {
-	local runSh=$binDir"run_linux.sh"
 	local binFile="$binDir$1"
 	
 	echo -e "\e[1;32m" --- $1 --- '\e[0m'
@@ -39,9 +39,13 @@ test_one() {
 compile_all_test
 
 #test_one ./test0
-for fileN in {0..5}; do
+for fileN in {0..2}; do
 	fileName="$baseTestName$fileN"
 	test_one "$fileName"
 done;
-
+for fileN in {3..5}; do
+	fileName="$binDir$baseTestName$fileN"
+	echo -e "\e[1;32m" --- $baseTestName$fileN --- '\e[0m'
+	$runSh $fileName
+done;
 

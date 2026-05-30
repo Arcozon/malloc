@@ -29,9 +29,7 @@ int     main()
         print("Failed to allocate memory\n");
         exit(1);
     }
-    print("memory\n");
     addr3 = (char*)realloc(addr1, 128*M);
-    print("memory\n");
     if (addr3 == NULL)
     {
         print("Failed to reallocate memory\n");
