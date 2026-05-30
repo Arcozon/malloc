@@ -81,7 +81,7 @@ t_large_heap	*new_large_heap(const size_t _mSize)
 
 t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 {
-
+//	ft_fprintf(2 ,"1\n");
 	if (_alloc_size <= _M_TINY_MAX_ALC_SIZE || _alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
 		t_heap	*newHeap = NULL;
 	

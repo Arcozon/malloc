@@ -9,6 +9,7 @@ void    print(char *s)
 
 int     main(void)
 {
+	void	*p = malloc(1024);
     int   i;
     char  *addr;
 

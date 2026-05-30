@@ -1,5 +1,6 @@
 #include "ft_printf.h"
 #include "impl_mlc.h"
+#include <pthread.h>
 #include <unistd.h>
 
 void	_insert_flst(t_flst *_pFree, t_heap *_heap)
@@ -72,6 +73,8 @@ void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 				t_heap	*fwdHeap = _heap->fwd;
 				t_heap	*bckHeap = _heap->bck;
 				
+				if (fwdHeap == NULL && bckHeap == NULL) // If this is the only heap we have we dont free it (
+					return ;			// 	Avoid to call mmap/munmap when you are alocating->freeing over and over again, keeping one free heap in case
 				if (fwdHeap != NULL) {
 					fwdHeap->bck = bckHeap;
 				}
@@ -140,6 +143,36 @@ void	_free_large(void *toFree)
 
 	if (munmap(heap, (heap->size & _M_SIZE_MASK) + sizeof(*heap)) != 0)
 		ft_fprintf(STDERR_FILENO, "ERROR: mmap failure %p\n", heap);
+}
+
+__attribute__((destructor(101)))
+void	_unmapTinySmallHeap(void) {
+	{
+		pthread_mutex_lock(&arenas[ARENA_TINY].mtx);
+		t_heap	*heap = arenas[ARENA_TINY].heap;
+
+		if (heap != NULL) {
+			const size_t heapSize = (heap->size & _M_SIZE_MASK) + sizeof(*heap);
+
+			if (munmap(heap, heapSize))
+				ft_fprintf(STDERR_FILENO, "ERROR: munmap failure\n");
+	
+		}
+		pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
+	}
+	{
+		pthread_mutex_lock(&arenas[ARENA_SMALL].mtx);
+		t_heap	*heap = arenas[ARENA_SMALL].heap;
+
+		if (heap != NULL) {
+			const size_t heapSize = (heap->size & _M_SIZE_MASK) + sizeof(*heap);
+
+			if (munmap(heap, heapSize))
+				ft_fprintf(STDERR_FILENO, "ERROR: munmap failure\n");
+	
+		}
+		pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
+	}
 }
 
 void	free(void *_ptr)

@@ -27,10 +27,14 @@
 
 # define _M_MIN_ALC_SIZE	(sizeof(t_flst) - sizeof(t_chunk))
 
-# define _M_TINY_MAX_ALC_SIZE	16UL
+# define _M_TINY_MAX_ALC_SIZE   2048UL
 
 # define _M_SMALL_MIN_ALC_SIZE	(_M_TINY_MAX_ALC_SIZE + 1UL)
-# define _M_SMALL_MAX_ALC_SIZE	128UL
+# define _M_SMALL_MAX_ALC_SIZE	8196UL
+
+# if _M_SMALL_MAX_ALC_SIZE <= _M_TINY_MAX_ALC_SIZE
+#   error "TF IS THAT"
+# endif
 
 # define _M_LARGE_MIN_ALC_SIZE	(_M_SMALL_MAX_ALC_SIZE + 1UL)
 
@@ -97,7 +101,5 @@ t_heap	*new_small_heap(void);
 t_large_heap	*new_large_heap(const size_t _mSize);
 
 void	*_mlc_large_mutex_locked(const size_t _size);
-
-void	debug_flst(const t_heap *heap);
 
 #endif

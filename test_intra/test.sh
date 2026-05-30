@@ -16,20 +16,32 @@ compile_all_test() {
 	done;
 }
 
+exec_grep() {
+	#$@
+	local res=$(($@ 1>/dev/null) 2>&1 | grep -E "Major|Minor")
+	echo $res | tr -cd '[:digit:] ' | awk '{printf("\t\tMajor: \033[34m%d\033[0m\n\t\tMinor: \033[34m%d\033[0m\n", $1, $2)}'
+}
+
 test_one() {
+	local runSh=$binDir"run_linux.sh"
 	local binFile="$binDir$1"
-	echo -e "\e[1;32m" --- $1 --- '\e[0m'
 	
+	echo -e "\e[1;32m" --- $1 --- '\e[0m'
 	echo -e "\e[1;35m" '\t'--- STDLIB --- '\e[0m'
-	/usr/bin/time -v $binFile 2>&1 | grep -E "Major|Minor"
+
+	exec_grep	"/usr/bin/time -v $binFile"
+
 	echo -e "\e[1;35m" '\t'--- FT_MALLOC --- '\e[0m'
-	echo -n $(export LD_LIBRARY_PATH="$(pwd)/.."; export LD_PRELOAD=libft_malloc.so;		/usr/bin/time -v $binFile)
-#		2>&1 | grep -E "Major|Minor")
+	
+	exec_grep "$runSh /usr/bin/time -v $binFile"
 }
 
 compile_all_test
 
+#test_one ./test0
 for fileN in {0..5}; do
 	fileName="$baseTestName$fileN"
 	test_one "$fileName"
 done;
+
+
