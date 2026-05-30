@@ -76,14 +76,9 @@ void	test_large_heap(void) {
 
 int main(void)
 {
- //	test_dump_heap();
+	test_dump_heap();
 //	test_large_heap();
 //	test_defrag1();
 //	test_defrag2();
 //	test_realloc();
-	const size_t	M = 1024*1024;
-	void	*p1= malloc(16*M);
-	void	*p2= realloc(p1, 128*M);
-
-	dump_large_heap();
 }
