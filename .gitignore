@@ -17,3 +17,4 @@ test_intra/bin/test2
 test_intra/bin/test3
 test_intra/bin/test4
 test_intra/bin/test5
+.printf/libftprintf.a

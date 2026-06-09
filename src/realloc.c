@@ -170,7 +170,7 @@ void	*realloc(void *_ptr, size_t _size)
 	if (newArena != oldArena) {
 		return (_need_new_aloc(chunk, _ptr, _size));
 	}
-	if (_size <= chunk->size || _extand_chunk(chunk, _size) != NULL) {
+	if (_size <= chunk->size || _extand_chunk(chunk, _size) != NULL) { //FIX 
 		return (_ptr);
 	}
 	else {
