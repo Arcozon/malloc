@@ -3,7 +3,7 @@
 #include "show_mem.h"
 #include <unistd.h>
 
-# define LINE_LEN	64
+# define LINE_LEN	256
 
 static inline void	_populate_cLine(char cLine[LINE_LEN], const char _c) {
 	const uint64_t	lc = _c;
@@ -89,7 +89,7 @@ static void	_fdump_heap_ptr(const int _fd, const t_heap *_heap, const t_chunk *_
 		ft_fprintf(_fd, BOLD);
 		_fprint_zone(_fd, clr, c, headerSize, i % LINE_LEN);
 		i += headerSize;
-		_fprint_zone(_fd, clr, '0', dataSize, i % LINE_LEN);
+		_fprint_zone(_fd, clr, '-', dataSize, i % LINE_LEN);
 		i += dataSize;
 	}
 	//ft_fprintf(_fd, "\n");

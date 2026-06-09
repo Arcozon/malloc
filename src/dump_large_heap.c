@@ -16,7 +16,7 @@ void fdump_large_heap(const int _fd) {
 			const void *endHeap = (void *)heap + sizeHeap + sizeof(*heap);
 
 			ft_printf(MAGENTA "	Heap " BOLD "%u" RBOLD ": ", i);
-			ft_printf("[%p-%p], Size: " BOLD "%u "RESET MAGENTA
+			ft_printf("[%p-%p], Size: " BOLD "%u"RESET MAGENTA
 					", Used: " BOLD "%u\n",
 						heap, endHeap,
 						(unsigned int)(sizeHeap + sizeof(*heap)),
