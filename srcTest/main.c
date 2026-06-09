@@ -47,14 +47,14 @@ void	test_defrag2(void) {
 	void *p2 = malloc(48);
 	void *p3 = malloc(48);
 
-	dump_heap_ptr(p0);
+	fdump_heap_ptr(2, p0);
 	free(p1);
 	free(p2);
-	dump_heap_ptr(p3);
+	fdump_heap_ptr(2, p3);
 
 
 	p1 = malloc(113);
-	dump_heap_ptr(p1);
+	fdump_heap_ptr(2, p1);
 	free(p0);
 	free(p3);
 }
@@ -76,11 +76,11 @@ void	test_large_heap(void) {
 
 int main(void)
 {
-	test_dump_heap();
+//	test_dump_heap();
 //	test_large_heap();
 //	test_defrag1();
 //	test_defrag2();
-//	test_realloc();
+	test_realloc();
 //	free(malloc(1));
 //	show_alloc_mem();
 }
