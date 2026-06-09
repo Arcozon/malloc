@@ -19,16 +19,13 @@ OBJ =  $(addprefix $(D_BUILD), $(patsubst %.c,%.o,$(S_SRC)))
 D_INC =  ./inc/
 
 CC =  cc
-FLAGS =  -Wall -Wextra -Werror -MMD -fPIC
+FLAGS =  -Wall -Wextra -Werror -MMD -fPIC  -fvisibility=hidden
 
 AR =  ar -rcs
 
 RM =  rm -rf
 
 all:	$(NAME)
-
-echosrc:
-	@echo $(SRC)
 
 bonus:	$(NAME)
 

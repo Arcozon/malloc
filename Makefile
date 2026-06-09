@@ -26,7 +26,7 @@ S_TEST	  =  $(addprefix $(D_TEST), $(SRC_TEST))
 TEST_NAME =  test
 
 CC =  cc 
-FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g -march=native
+FLAGS = -Wall -Wextra -Werror -fno-builtin -MMD -fPIC -g -march=native -fvisibility=hidden
 
 D_INC := inc/ . $(D_LPRINTF)
 IFLAGS = $(addprefix -I, $(D_INC))
@@ -39,7 +39,7 @@ MAKE += --no-print-directory
 all:	$(NAME)
 
 $(NAME):	$(OBJ) $(L_PRINTF)
-	$(LINKER) -o$@ $^ -L$(D_LPRINTF) -l$(S_LPRINTF)
+	$(LINKER) -o$@ $^ -L$(D_LPRINTF) -l$(S_LPRINTF) 
 	ln -sf $@ $(NAME_SIMLINK) 
 
 $(OBJ): $(D_BUILD)%.o:	$(D_SRC)%.c

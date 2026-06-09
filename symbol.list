@@ -1,0 +1,1 @@
+{malloc;free;realloc;show_alloc_mem;dump_heap_ptr;fdump_heap_ptr;dump_large_heap;fdump_large_heap;};

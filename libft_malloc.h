@@ -19,16 +19,17 @@
 
 typedef unsigned long size_t;
 
-void	free(void *ptr);
-void	*malloc(size_t size);
-void	*realloc(void *ptr, size_t size);
 
-void	show_alloc_mem(void);
+void	free(void *ptr)	__attribute__((visibility("default")));
+void	*malloc(size_t size)	__attribute__((visibility("default")));
+void	*realloc(void *ptr, size_t size)	__attribute__((visibility("default")));
 
-void	dump_heap_ptr(const void *_ptr);
-void	fdump_heap_ptr(const int _fd, const void *_ptr);
+void	show_alloc_mem(void)	__attribute__((visibility("default")));
 
-void	dump_large_heap(void);
-void	fdump_large_heap(const int _fd);
+void	dump_heap_ptr(const void *_ptr)	__attribute__((visibility("default")));
+void	fdump_heap_ptr(const int _fd, const void *_ptr)	__attribute__((visibility("default")));
+
+void	dump_large_heap(void)	__attribute__((visibility("default")));
+void	fdump_large_heap(const int _fd)	__attribute__((visibility("default")));
 
 #endif
