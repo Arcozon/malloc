@@ -1,6 +1,7 @@
 #include "ft_printf.h"
 #include "impl_mlc.h"
 #include <pthread.h>
+#include <stdint.h>
 #include <unistd.h>
 
 
@@ -158,13 +159,17 @@ void	free(void *_ptr)
 {
 	if (_ptr)
 	{
-		t_chunk	*bchunk = _ptr - sizeof(*bchunk);
-//		ft_fprintf(2,"Tofree: %p\n", bchunk);
-		if ((bchunk->size & _M_DATA_MASK) == ARENA_TINY) {
-			_free_chunk(bchunk, ARENA_TINY);
+		t_chunk	*chunk = _ptr - sizeof(*chunk);
+
+		if (((uintptr_t)chunk & _M_ALIGN) != 0 || (chunk->size & _M_FREE_MASK) != 0) {
+			asdssa //abort
 		}
-		else if ((bchunk->size & _M_DATA_MASK) == ARENA_SMALL) {
-			_free_chunk(bchunk, ARENA_SMALL);
+		
+		if ((chunk->size & _M_ARENA_MASK) == ARENA_TINY) {
+			_free_chunk(chunk, ARENA_TINY);
+		}
+		else if ((chunk->size & _M_ARENA_MASK) == ARENA_SMALL) {
+			_free_chunk(chunk, ARENA_SMALL);
 		}
 		else {
 			_free_large(_ptr);
