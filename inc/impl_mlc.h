@@ -102,4 +102,14 @@ t_large_heap	*new_large_heap(const size_t _mSize);
 
 void	*_mlc_large_mutex_locked(const size_t _size);
 
+void	_insertFlst(t_flst *_pFree, t_heap *_heap);
+
+__attribute__((always_inline, const))
+static inline size_t	_round_size(size_t _size)
+{
+	if (!_size)
+		_size =  (sizeof(t_flst) - sizeof(t_chunk));
+	return ((_size + (_M_ALIGN - 1)) & ~_M_ALIGN_MASK);
+}
+
 #endif

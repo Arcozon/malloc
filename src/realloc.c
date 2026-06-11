@@ -1,7 +1,9 @@
 #include "impl_mlc.h"
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <pthread.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 __attribute__((__always_inline__))
 static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, size_t _size) {
@@ -96,12 +98,8 @@ static inline void	*_extandLarge(t_chunk *_chunk, const size_t _size) {
 
 __attribute__((always_inline))
 static inline void	*_extandChunk(t_chunk *_chunk, const size_t _size) {
-	const int idArena = _chunk->size & _M_ARENA_MASK;
-
-	if (idArena == ARENA_LARGE) {
-		return (_extandLarge(_chunk, _size));
-	}
-	pthread_mutex_lock(&arenas[idArena].mtx);
+	
+	const int idArena = _chunk->size & _M_ARENA_MASK; //dototod
 
 	t_chunk	*fwd = (void *)_chunk + (_chunk->size & _M_SIZE_MASK);
 	t_heap	*heap = _chunk->pheap;
@@ -109,11 +107,10 @@ static inline void	*_extandChunk(t_chunk *_chunk, const size_t _size) {
 
 	if ((void *)fwd >= endHeap || !(fwd->size & _M_FREE_MASK)
 		|| _size > ((fwd->size & _M_SIZE_MASK) + (_chunk->size &_M_SIZE_MASK))) {
-		pthread_mutex_unlock(&arenas[idArena].mtx);
 		return (NULL);
 	}
 
-	pthread_mutex_unlock(&arenas[idArena].mtx);
+	// resize
 	return ((void *)_chunk + sizeof(*_chunk));
 }
 
@@ -138,14 +135,55 @@ void	*_realloc_large(void *_oldPtr, const size_t _size) {
 }
 
 __attribute__((always_inline))
-static inline void	*_resizeChunk(t_chunk *chunk, const size_t _size, const int oldArena) {
-	chunk	// Lock -> unlock
-	if (size <= alreadyAlocked) {
-		shrink or od nothing
-		and return
-	} else
-		try to extand
-	else
+static inline void	_joinFlst(t_flst *oldFlst, const size_t freedSize) {
+	t_flst *newFlst = (void *)oldFlst - freedSize;
+	t_flst *bck = oldFlst->bck;
+	t_flst *fwd = oldFlst->fwd;
+
+	*newFlst = *oldFlst;
+	if (bck != NULL) {
+		bck->fwd = newFlst;
+	} else {
+		oldFlst->pheap->flst = newFlst;
+	}
+	if (fwd !=NULL) {
+		fwd->bck = newFlst;
+	}
+}
+
+__attribute__((always_inline))
+static inline void	*_shrinkChunk(t_chunk *chunk, const size_t _size, const size_t _oldSize) {
+	t_chunk		*nextChunk = (void *)chunk + sizeof(*chunk) + (_oldSize & _M_SIZE_MASK);
+	const size_t	freedSize = _oldSize - _size;
+
+	if (nextChunk->size & _M_FREE_MASK) {
+		_joinFlst((t_flst *)nextChunk, freedSize);
+	} else if (freedSize >= sizeof(t_flst)) {
+		t_flst *newFlst = (void *)chunk + sizeof(*chunk) + _size;
+
+		newFlst->pheap = chunk->pheap;
+		newFlst->size = freedSize | _M_FREE_MASK | (_oldSize &_M_ARENA_MASK);
+		newFlst->bck = NULL;
+		newFlst->fwd = NULL;
+		_insertFlst(newFlst, chunk->pheap);
+	}
+	return ((void *)chunk + sizeof(*chunk));
+}
+
+__attribute__((always_inline))
+static inline void	*_resizeChunk(t_chunk *chunk, const size_t _size, const size_t _oldSize, const int _arena) {
+	if (_size <= _oldSize && _size + _M_ALIGN > _oldSize)
+		return ((void*)chunk + _oldSize);
+
+	void	*res = NULL;
+
+	pthread_mutex_lock(&arenas[_arena].mtx);
+	if (_size < _oldSize) {
+		res = _shrinkChunk(chunk, _oldSize, _oldSize);
+	} else {
+		_extand
+	}
+	pthread_mutex_unlock(&arenas[_arena].mtx);
 	return (NULL);
 }
 
@@ -159,13 +197,16 @@ void	*realloc(void *_ptr, size_t _size) {
 	
 	t_chunk		*chunk = _ptr - sizeof(*chunk);
 	const int	oldArena = (chunk->size & _M_ARENA_MASK);
-	const int	newArena = _getArena(_size);
+	const size_t	roundedSize = _round_size(_size);
+	const int	newArena = _getArena(roundedSize);
 
 	if (newArena != oldArena) {
-		return (_need_new_aloc(chunk, _ptr, _size));
+		return (_need_new_aloc(chunk, _ptr, roundedSize));
+	} else if (oldArena == ARENA_LARGE) {
+		return (_realloc_large(_ptr, roundedSize));
 	}
-	void	*resizePtr = _resizeChunk(chunk, _size);
+	void	*resizePtr = _resizeChunk(chunk, roundedSize, chunk->size, oldArena);
 	if (resizePtr != NULL)
 		return (resizePtr);
-	return (_need_new_aloc(chunk, _ptr, _size));
+	return (_need_new_aloc(chunk, _ptr, roundedSize));
 }

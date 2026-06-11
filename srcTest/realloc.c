@@ -50,7 +50,7 @@ void	test_one_realloc(const size_t size, const size_t resize, const void *src, c
 		return ;
 	}
 	const int cmpMem = memcmp(src, realc, sizeContentRealloc);
-	printf("\tMemory copied on "BLUE"%lu"RESET": %s"RESET"", sizeContentRealloc, memOK[cmpMem != 0]);
+	printf("\tMemory copied to "BLUE"%lu"RESET": %s"RESET"", sizeContentRealloc, memOK[cmpMem != 0]);
 	printf("\t["MAGENTA"%s"RESET"] -> ["MAGENTA"%s"RESET"]\n", arenaAlc, _getArena(realc));
 	free(realc);
 }

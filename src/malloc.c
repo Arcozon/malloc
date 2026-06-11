@@ -150,17 +150,6 @@ static inline void	*_mlc_large(const size_t _size) {
 	return (res);
 }
 
-__attribute__((always_inline, const))
-static inline size_t	_round_size(size_t _size)
-{
-	if (!_size)
-		_size =  (sizeof(t_flst) - sizeof(t_chunk));
-	///if (_size % _M_ALIGN)
-	//	_size = (_size & ~_M_ALIGN_MASK) + _M_ALIGN;
-	//return (_size);
-	return ((_size + (_M_ALIGN - 1)) & ~_M_ALIGN_MASK);
-}
-
 void	*malloc(const size_t _size) {
 	const size_t rounded_size = _round_size(_size);
 
