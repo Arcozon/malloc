@@ -65,6 +65,7 @@ test_n2() {
 	echo $minor1 | awk '{printf("\ttest1 (without free)   Minor page faults: \033[34m%4d\033[0m\n", $1)}' 
 	echo $minor2 | awk '{printf("\ttest2 (with free)      Minor page faults: \033[34m%4d\033[0m\n", $1)}' 
 }
+mkdir -p "$binDir"
 compile_all_test
 
 for fileN in {0..2}; do

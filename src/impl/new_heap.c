@@ -64,7 +64,6 @@ t_heap	*new_small_heap(void)
 	return (_new_heap(small_size, ARENA_SMALL));
 }
 
-#include "stdio.h"
 t_large_heap	*new_large_heap(const size_t _mSize)
 {
 	const size_t	size = _round_page_size(_mSize + sizeof(t_large_heap));
@@ -75,7 +74,7 @@ t_large_heap	*new_large_heap(const size_t _mSize)
 		return (NULL);
 	nlHeap->fwd = NULL;
 	nlHeap->bck = NULL;
-	nlHeap->used = _mSize;	
+	nlHeap->used = _mSize;
 	nlHeap->size = (size - sizeof(*nlHeap)) | ARENA_LARGE;
 	return (nlHeap);
 }

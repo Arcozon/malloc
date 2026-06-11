@@ -44,7 +44,6 @@ static void	_update_flst(t_flst *_old, const size_t _size)
 {
 	t_flst *new = _old->fwd;
 
-	//ft_fprintf(2, "OldSize: %u\n", 	(uint32_t)(_old->size & _M_SIZE_MASK));
 	if ((_old->size & _M_SIZE_MASK) >= sizeof(t_flst) + _size) {
 		new = (void *)_old + sizeof(t_chunk) + _size;
 		new->pheap = _old->pheap;
@@ -80,15 +79,7 @@ t_chunk	*_resrv_in_pheaps(const size_t _size, t_heap **restrict _pheap)
 			 return (NULL);
 		 fptr = _find_in_flst(_size, nheap->flst, NULL, &placeFlst);
 	}
-//	ft_fprintf(2, "\nBefore Alc:\n");
-//	debug_flst(*_pheap);
-//	ft_fprintf(2, "Can flst\n");
 	_update_flst(fptr, _size);
-//	ft_printf("MeSize: %u, OldSize: %u\n", (unsigned int)_size, (unsigned int)(fptr->size & _M_SIZE_MASK) );
-	//_del_flst(fptr);
-//	ft_fprintf(2, "After Alc[%u]:\n", (unsigned int) _size);
-//	debug_flst(*_pheap);
-//	ft_fprintf(2, "\n");
 	return ((t_chunk *)fptr);
 }
 
@@ -101,7 +92,6 @@ void	*_mlc_tiny(const size_t _size)
 			cres->size |= ARENA_TINY;
 	}
 
-	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));
 	pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
 	return ((void *)cres + sizeof(*cres));
 }
@@ -115,7 +105,6 @@ void	*_mlc_small(const size_t _size)
 		cres->size |= ARENA_SMALL;
 
 	pthread_mutex_unlock(&arenas[ARENA_SMALL].mtx);
-	//ft_fprintf(2, "Ret: %p\n", ((void *)cres + sizeof(t_chunk)));
 	return ((void *)cres + sizeof(*cres));
 }
 

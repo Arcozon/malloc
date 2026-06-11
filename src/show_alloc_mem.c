@@ -10,10 +10,7 @@ void	_print_free_chunk(const t_flst *_flst)
 	const void	*endFlst = beginFlst + sizeFlst;
 
 	ft_printf(GREEN "		");
-//	ft_printf("Bck: %p | ", _flst->bck);
 	ft_printf("[%p-%p], Size: %u", beginFlst, endFlst, (unsigned int)sizeFlst);
-	//ft_printf("[%p-%p], Size: %u | ", beginFlst, endFlst, (unsigned int)sizeFlst);
-//	ft_printf("Fwd: %p", _flst->fwd);
 	ft_printf(RESET "\n");
 }
 
@@ -73,6 +70,5 @@ void	show_alloc_mem(void)
 	_show_arena(&arenas[ARENA_TINY]);
 	ft_printf(BLUE "[" BOLD "SMALL" RBOLD "]\n" RESET);
 	_show_arena(&arenas[ARENA_SMALL]);
-	//ft_printf(BLUE "[" BOLD "LARGE" RBOLD "]\n" RESET);
 	dump_large_heap();
 }

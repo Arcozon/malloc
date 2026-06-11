@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
-
+#include "stdio.h"
+#include <stdlib.h>
 
 void	_cat_flst(t_flst *_pFree)
 {
@@ -13,7 +14,6 @@ void	_cat_flst(t_flst *_pFree)
 	t_flst	*bck = _pFree->bck;
 	t_flst	*fwd = _pFree->fwd;
 
-//	ft_fprintf(2, "Start: %p	End: %p\n", pBegin, pEnd);
 	if (fwd == pEnd) {
 		t_flst *fwd_fwd = fwd->fwd;
 
@@ -39,16 +39,11 @@ void	_cat_flst(t_flst *_pFree)
 
 void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 {
-//	ft_fprintf(2, "Is heap NULL\n");
 	if (_heap->flst != NULL) {
 		const t_flst	*flst = _heap->flst;
-//		ft_fprintf(2, "Is flst at the start of heap\n");
 		if ((void *)_heap + sizeof(*_heap) == (void *)flst) {
 			const void	*endHeap = (void *)_heap + (_heap->size & _M_SIZE_MASK) + sizeof(*_heap);
 			const void	*endFlst = (void *)flst + (flst->size & _M_SIZE_MASK) + sizeof(t_chunk);
-//			debug_flst(_heap);
-//			ft_fprintf(2, "Do they end at the same place\n");
-//			ft_fprintf(2, "%p - %p\n", endHeap, endFlst);
 			if (endHeap == endFlst) {
 				t_heap	*fwdHeap = _heap->fwd;
 				t_heap	*bckHeap = _heap->bck;
@@ -66,7 +61,6 @@ void	_free_heap(t_heap *_heap, t_heap **_pFheap)
 				}
 				if (munmap(_heap, (_heap->size & _M_SIZE_MASK) + sizeof(*_heap)))
 					ft_fprintf(STDERR_FILENO, "ERROR: munmap failure\n");
-				//ft_fprintf(2, "-- HEAP FREED --\n\n");
 			}
 		}
 	}
@@ -79,23 +73,14 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 	t_heap		*heap = _chunk->pheap;
 	t_flst		*pFree = (void *)_chunk;
 
-	//ft_fprintf(2, "Size: %u\n", (unsigned int)_chunk->size);
 	pFree->fwd = NULL;
 	pFree->bck = NULL;
 	pFree->size &= _M_SIZE_MASK;
 	pFree->size |= _arenaMask | _M_FREE_MASK;
 
-//	ft_fprintf(2, "\nBefore:\n");
-//	debug_flst(heap);
-	_insert_flst(pFree, heap);
-//	ft_fprintf(2, "\nAfter Insert:\n");
-//	debug_flst(heap);
+	_insertFlst(pFree, heap);
 	_cat_flst(pFree);
-//	ft_fprintf(2, "\nAfter Cat:\n");
-//	debug_flst(heap);
-//	ft_fprintf(2, "\n");
 	_free_heap(heap, &arenas[_arenaMask].heap);
-	//debug_flst(arenas[_arenaMask].heap);
 	pthread_mutex_unlock(&arenas[_arenaMask].mtx);
 }
 
@@ -108,7 +93,6 @@ void	_free_large(void *toFree)
 	t_large_heap	*fwd = heap->fwd;	
 	t_large_heap	*bck = heap->bck;	
 	
-	 //ft_fprintf(2, "Free: %p <- %p -> %p\n", bck, heap, fwd);
 	if (fwd != NULL) {
 		fwd->bck = bck;
 	}
@@ -160,9 +144,11 @@ void	free(void *_ptr)
 	if (_ptr)
 	{
 		t_chunk	*chunk = _ptr - sizeof(*chunk);
+		// printf("Freeing %p [%lu] %d %d\n", _ptr, chunk->size & _M_DATA_MASK, ((uintptr_t)_ptr & _M_ALIGN_MASK) != 0, (chunk->size & _M_FREE_MASK) != 0);
 
-		if (((uintptr_t)chunk & _M_ALIGN) != 0 || (chunk->size & _M_FREE_MASK) != 0) {
-			asdssa //abort
+		if (((uintptr_t)_ptr & _M_ALIGN_MASK) != 0 || (chunk->size & _M_FREE_MASK) != 0) {
+			ft_fprintf(2, "Invalid free\n");
+			abort();
 		}
 		
 		if ((chunk->size & _M_ARENA_MASK) == ARENA_TINY) {
