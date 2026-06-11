@@ -269,12 +269,12 @@ void	*realloc(void *_ptr, size_t _size) {
 	const int	newArena = _getArena(roundedSize);
 
 	if (newArena != oldArena) {
-		return (_need_new_aloc(chunk, _ptr, roundedSize));
+		return (_need_new_aloc(chunk, _ptr, _size));
 	} else if (oldArena == ARENA_LARGE) {
 		return (_reallocLarge(_ptr, _size));
 	}
 	void	*resizePtr = _resizeChunk(chunk, roundedSize, chunk->size & _M_SIZE_MASK, oldArena);
 	if (resizePtr != NULL)
 		return (resizePtr);
-	return (_need_new_aloc(chunk, _ptr, roundedSize));
+	return (_need_new_aloc(chunk, _ptr, _size));
 }
