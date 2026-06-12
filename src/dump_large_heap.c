@@ -1,6 +1,5 @@
 #include "impl_mlc.h"
 #include "show_mem.h"
-#include <time.h>
 
 void fdump_large_heap(const int _fd) {
 	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);

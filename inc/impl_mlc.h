@@ -17,6 +17,7 @@
 # include <unistd.h>
 # include <stdint.h>
 # include <pthread.h>
+#include <stdlib.h>
 
 # include "ft_printf.h"
 # include "ft_malloc.h"

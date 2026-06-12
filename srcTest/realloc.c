@@ -1,9 +1,6 @@
-#include "ft_malloc.h"
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include "ft_printf.h"
 #include "impl_mlc.h"
+#include "stdio.h"
+#include <string.h>
 
 #ifndef SHOW_MEM_H
 # define SHOW_MEM_H

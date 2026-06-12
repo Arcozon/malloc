@@ -1,9 +1,6 @@
 #include "impl_mlc.h"
 #include <emmintrin.h>
 #include <immintrin.h>
-#include <pthread.h>
-#include <stdint.h>
-#include <stdio.h>
 
 __attribute__((__always_inline__))
 static inline void	*_ft_align_memcpy(void *restrict _dst, void *restrict _src, size_t _size) {
@@ -141,9 +138,7 @@ static inline void	*_extandChunk(t_chunk *_chunk, const size_t _size) {
 	t_flst	*bck	= oFlst->bck;
 	t_flst	*fwd	= oFlst->fwd;
 	
-	// printf("Oldflst: %p\nHepflst: %p\n", oFlst, _chunk->pheap->flst);
 	if ((oFlst->size & _M_SIZE_MASK) + sizeof(t_chunk) <= sizeExtand + sizeof(t_flst)) { // No place for new Flst
-		// printf("No place for new one \n"); //HERE
 		if (bck != NULL) {
 			bck->fwd = fwd;
 		} else {
@@ -151,27 +146,18 @@ static inline void	*_extandChunk(t_chunk *_chunk, const size_t _size) {
 		}
 		if (fwd != NULL)
 			fwd->bck = bck;
-		// printf("%p | %p\n", oFlst, (void *)oFlst + sizeof(*_chunk) + (oFlst->size & _M_SIZE_MASK));
 		_chunk->size = ((void *)oFlst + (oFlst->size & _M_SIZE_MASK)) - (void *)_chunk;
-		// printf("%lu\n", _chunk->size);
 		_chunk->size |= oldArena;
 	} else {	//Place for a new one
-		// printf("Place for new one \n"); //HERE
 		t_flst *nFlst = (void *)oFlst + sizeExtand;
-		// printf("Nflst: %p\n", nFlst);
-		// pthread_mutex_unlock(&arenas[ARENA_TINY].mtx);
-		// dump_heap_ptr((void *)_chunk + sizeof(*_chunk));
-		// pthread_mutex_lock(&arenas[ARENA_TINY].mtx);
 		nFlst->pheap = oFlst->pheap; 
 		nFlst->size = oFlst->size - sizeExtand;
 		nFlst->bck = bck; 
 		nFlst->fwd = fwd;
 		if (bck != NULL) {
-			// printf("BCK != NULL \n"); //HERE
 			bck->fwd = nFlst;
 		} else {
 			_chunk->pheap->flst = nFlst;
-			// printf("BCK == NULL \n"); //HERE
 		}
 		if (fwd != NULL)
 			fwd->bck = nFlst;
@@ -188,29 +174,17 @@ static inline void	_joinFlst(t_chunk *chunk, t_flst *oldFlst, const size_t freed
 	t_flst *bck = oldFlst->bck;
 	t_flst *fwd = oldFlst->fwd;
 	
-	// pthread_mutex_unlock(&arenas[chunk->size &_M_ARENA_MASK].mtx);
-	// show_alloc_mem();
-	// pthread_mutex_lock(&arenas[chunk->size &_M_ARENA_MASK].mtx);
-	// ft_fprintf(2, "Freed %u\n", (unsigned int)freedSize);
-	// ft_printf("%p | %p | %p | %u\n", oldFlst->bck, oldFlst->fwd, oldFlst->pheap, (unsigned int)(oldFlst->size));
 	*newFlst = *oldFlst;
 	newFlst->size += freedSize;
-	// ft_printf("%p | %p | %p | %u\n", newFlst->bck, newFlst->fwd, newFlst->pheap, (unsigned int)(newFlst->size));
 	if (bck != NULL) {
 		bck->fwd = newFlst;
 	} else {
-		// ft_printf("pre\n");
 		newFlst->pheap->flst = newFlst;
-		// ft_printf("post\n");
 	}
 	if (fwd !=NULL) {
 		fwd->bck = newFlst;
 	}
 	chunk->size -= freedSize;
-	// pthread_mutex_unlock(&arenas[chunk->size &_M_ARENA_MASK].mtx);
-	// show_alloc_mem();
-	// pthread_mutex_lock(&arenas[chunk->size &_M_ARENA_MASK].mtx);
-	// ft_fprintf(2, "Freed %u\n", (unsigned int)freedSize);
 }
 
 __attribute__((always_inline))
@@ -219,13 +193,10 @@ static inline void	*_shrinkChunk(t_chunk *chunk, const size_t _size, const size_
 	t_chunk			*nextChunk = (void *)chunk + sizeof(*chunk) + (_oldSize & _M_SIZE_MASK);
 
 	if (nextChunk->size & _M_FREE_MASK) {
-		// printf("extand Flst\n"); //HERE
 		_joinFlst(chunk, (t_flst *)nextChunk, freedSize);
 	} else if (freedSize >= sizeof(t_flst)) {
-		// printf("New Flst\n"); //HERE
 		t_flst *newFlst = (void *)chunk + sizeof(*chunk) + _size;
 
-		// printf("C:%p F:%p\n", chunk, newFlst);
 		newFlst->pheap = chunk->pheap;
 		newFlst->size = (freedSize - sizeof(t_chunk)) | _M_FREE_MASK | (_oldSize &_M_ARENA_MASK);
 		newFlst->bck = NULL;
@@ -245,10 +216,8 @@ static inline void	*_resizeChunk(t_chunk *chunk, const size_t _size, const size_
 	
 	pthread_mutex_lock(&arenas[_arena].mtx);
 	if (_size < _oldSize) {
-		// printf("shrink\n"); //HERE
 		res = _shrinkChunk(chunk, _size, _oldSize);
 	} else {
-		// printf("extand\n"); //HERE
 		res = _extandChunk(chunk, _size);
 	}
 	pthread_mutex_unlock(&arenas[_arena].mtx);

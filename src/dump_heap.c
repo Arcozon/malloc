@@ -1,7 +1,5 @@
-#include "ft_printf.h"
 #include "impl_mlc.h"
 #include "show_mem.h"
-#include <unistd.h>
 
 # define LINE_LEN	256
 

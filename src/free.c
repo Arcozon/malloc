@@ -1,11 +1,4 @@
-#include "ft_printf.h"
 #include "impl_mlc.h"
-#include <pthread.h>
-#include <stdint.h>
-#include <unistd.h>
-
-#include "stdio.h"
-#include <stdlib.h>
 
 void	_cat_flst(t_flst *_pFree)
 {
@@ -86,7 +79,6 @@ void	_free_chunk(t_chunk *_chunk, const size_t _arenaMask)
 
 void	_free_large(void *toFree)
 {
-//	ft_printf("Free large\n");
 	pthread_mutex_lock(&arenas[ARENA_LARGE].mtx);
 	
 	t_large_heap	*heap = toFree - sizeof(*heap);	
@@ -144,7 +136,6 @@ void	free(void *_ptr)
 	if (_ptr)
 	{
 		t_chunk	*chunk = _ptr - sizeof(*chunk);
-		// printf("Freeing %p [%lu] %d %d\n", _ptr, chunk->size & _M_DATA_MASK, ((uintptr_t)_ptr & _M_ALIGN_MASK) != 0, (chunk->size & _M_FREE_MASK) != 0);
 
 		if (((uintptr_t)_ptr & _M_ALIGN_MASK) != 0 || (chunk->size & _M_FREE_MASK) != 0) {
 			ft_fprintf(2, "Invalid free\n");

@@ -1,6 +1,4 @@
-#include "ft_printf.h"
 #include "impl_mlc.h"
-#include <time.h>
 
 t_flst	*_find_in_flst(const size_t _size, const t_flst *restrict _flst, const t_flst *_bres, unsigned char *_placeFlst)
 {

@@ -1,6 +1,4 @@
-#include "ft_printf.h"
 #include "impl_mlc.h"
-#include <sys/mman.h>
 
 t_arena arenas[3] = {
 	[ARENA_TINY] = {.mtx = PTHREAD_MUTEX_INITIALIZER, .heap = NULL},
@@ -25,9 +23,6 @@ t_heap	*_new_heap(const size_t _size, const size_t _flagArena)
 	nflst->pheap = newHeap;
 	nflst->size = _size - sizeof(*newHeap) - sizeof(t_chunk);
 	nflst->size |= _M_FREE_MASK | _flagArena;
-//	ft_fprintf(2, " -- New Heap: %p | size: %u\n", newHeap, (unsigned int)_size);
-//	ft_fprintf(2, "Bck : %p | Fwd: %p\n", newHeap->bck, newHeap->fwd);
-//	ft_fprintf(2, " -- New Flst: %p | size: %u\n\n", nflst, (unsigned int)(nflst->size & ~_M_DATA_MASK));
 	return (newHeap);
 }
 
@@ -81,7 +76,6 @@ t_large_heap	*new_large_heap(const size_t _mSize)
 
 t_heap	*new_heap(t_heap **restrict _pHeapHead, const size_t _alloc_size)
 {
-//	ft_fprintf(2 ,"1\n");
 	if (_alloc_size <= _M_TINY_MAX_ALC_SIZE || _alloc_size <= _M_SMALL_MAX_ALC_SIZE) {
 		t_heap	*newHeap = NULL;
 	

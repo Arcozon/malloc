@@ -1,7 +1,5 @@
-#include "ft_printf.h"
 #include "impl_mlc.h"
 #include "show_mem.h"
-
 
 void	_print_free_chunk(const t_flst *_flst)
 {

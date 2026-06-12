@@ -12,8 +12,6 @@
 
 #include "my_printf.h"
 
-#include "my_printf.h"
-
 int	get_ulong_len_b16(t_uint64 nb)
 {
 	int	len;
